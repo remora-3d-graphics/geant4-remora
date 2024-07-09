@@ -51,9 +51,11 @@ void Server::SendMessages(){
       sockets.push_back(clientSocket);
     }
 
-    std::ostringstream oss;
-    oss << "There are currently: " << sockets.size() << " clients.";
-    std::string msg = oss.str();
+    // std::ostringstream oss;
+    // oss << "There are currently: " << sockets.size() << " clients.";
+    // std::string msg = oss.str();
+
+    std::string msg = "SetTitleHello World.";
 
     SendToAll(msg);
 
