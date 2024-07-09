@@ -3,7 +3,15 @@
 Server::Server(){
   std::cout << "Hello Server" << std::endl;
 
-  Init(); // stops main function execution
+  if (Init() != 0){
+    std::cout 
+    << "Server did not initialize properly. "
+    << std::endl
+    << "To use a server for visualization, please restart the app."
+    << std::endl;
+
+    return;
+  }
 
   // runs concurrently with the rest of the main function
   listenThread = std::thread(&Server::AcceptConnections, this);
