@@ -50,18 +50,41 @@ void Server::SendMessages(){
       newSockets.pop_front();
       sockets.push_back(clientSocket);
     }
-    
 
-    //  shut down:
-    // status = shutdown(clientSocket, SD_BOTH);
-    // if (status == -1){
-    //   std::cout << "Shutdown failed" << std::endl;
-    //   cp_close(clientSocket);
-    //   return 1;
-    // }
+    std::ostringstream oss;
+    oss << "There are currently: " << sockets.size() << " clients.";
+    std::string msg = oss.str();
+
+    SendToAll(msg);
+
+    // pause for a few seconds
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     // cp_close(clientSocket);
   }
+}
+
+int Server::SendToAll(std::string strmsg){
+
+  int returnCode = 0;
+
+  for (int s: sockets){
+    const char* msg = strmsg.c_str();
+    int len, bytes_sent;
+
+    len = strlen(msg);
+    bytes_sent = send(s, msg, len, 0);
+
+    if (bytes_sent != len){
+      std::cout << "The whole message wasn't quite sent!" << std::endl;
+      // return 1;
+    }
+    else {
+      std::cout << "Sent message" << std::endl;
+    }
+  }
+
+  return returnCode;
 }
 
 int Server::SendWelcomeMessage(int clientSocket){

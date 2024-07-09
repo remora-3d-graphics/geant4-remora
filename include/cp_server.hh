@@ -7,6 +7,8 @@
 #include <list>
 #include <thread>
 #include <string>
+#include <sstream>
+#include <chrono>
 
 class Server {
 public:
@@ -19,7 +21,7 @@ private:
   void SendMessages();
 
   int SendWelcomeMessage(int newSocket);
-  int SendToAll(std::string msg){};
+  int SendToAll(std::string msg);
 
   void Stop(){ running = false; }
 
