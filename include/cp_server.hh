@@ -9,11 +9,14 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <queue>
 
 class Server {
 public:
   Server();
   ~Server();
+
+  int QueueMessageToBeSent(std::string msg){ messagesToBeSent.push(msg); };
 
 private:
   int Init();
@@ -32,6 +35,8 @@ private:
 
   std::thread listenThread;
   std::thread sendDataThread;
+
+  std::queue<std::string> messagesToBeSent;
 
   bool running = true;
 };

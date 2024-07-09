@@ -55,12 +55,15 @@ void Server::SendMessages(){
     // oss << "There are currently: " << sockets.size() << " clients.";
     // std::string msg = oss.str();
 
-    std::string msg = "SetTitleHello World.";
+    // std::string msg = "SetTitleHello World.";
 
-    SendToAll(msg);
+    if (messagesToBeSent.size() > 0){
+      SendToAll(messagesToBeSent.front());
+      messagesToBeSent.pop();
+    }
 
     // pause for a few seconds
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    // std::this_thread::sleep_for(std::chrono::seconds(5));
 
     // cp_close(clientSocket);
   }
