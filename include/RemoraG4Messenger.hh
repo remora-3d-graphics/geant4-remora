@@ -7,6 +7,9 @@
 #include "cp_server.hh"
 
 namespace remora {
+
+  class Server;
+
 	class RemoraMessenger : public G4UImessenger {
 	public:
 		RemoraMessenger(Server* s);

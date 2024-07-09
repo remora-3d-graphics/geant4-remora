@@ -11,9 +11,9 @@
 #include <chrono>
 #include <queue>
 
-class RemoraMessenger;
-
 namespace remora {
+
+  class RemoraMessenger;
 
 	class Server {
 	public:
