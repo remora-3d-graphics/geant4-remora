@@ -13,6 +13,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 
 # Todo:
 - [ ] If a socket disconnects, make sure and remove it from the sockets list
+- [ ] client side: if server disconnects, disconnect as well. 
 - [ ] Error handling for sending and receiving messages
 
 ## Message format:
