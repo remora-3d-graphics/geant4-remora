@@ -1,0 +1,11 @@
+/run/initialize
+
+/gps/particle e-
+/gps/energy 10 MeV
+/gps/direction 0 0 1
+/gps/position 0 0 -10 cm
+/gps/pos/type Beam
+/gps/pos/shape Circle
+/gps/pos/radius 1 cm
+
+/run/beamOn 5000

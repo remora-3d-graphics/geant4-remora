@@ -1,0 +1,11 @@
+FROM john9francis/geant4
+
+WORKDIR /home/gps_test/
+
+COPY . /home/gps_test/
+
+WORKDIR /home/gps_test/linux_build/
+
+RUN cmake .. && make -j10
+
+CMD [ "./gps_test" ]

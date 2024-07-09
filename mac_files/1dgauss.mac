@@ -1,0 +1,14 @@
+/run/initialize
+
+/gps/particle e-
+/gps/energy 10 MeV
+/gps/direction 0 0 1
+/gps/position 0 0 -10 cm
+
+/gps/pos/type Beam
+/gps/pos/shape Rectangle
+/gps/pos/halfx 6 mm
+/gps/pos/halfy 2.5 mm
+/gps/pos/sigma_y 1.09389 mm
+
+/run/beamOn 1000000
