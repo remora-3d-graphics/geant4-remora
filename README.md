@@ -15,6 +15,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] If a socket disconnects, make sure and remove it from the sockets list
 - [ ] client side: if server disconnects, disconnect as well. 
 - [ ] Error handling for sending and receiving messages
+- [ ] Basically graceful disconnection needs to be addressed from server and client sides.
 
 ## Message format:
 - From server: (saves # bytes in message) `{Json_string}`
