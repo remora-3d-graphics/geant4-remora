@@ -41,39 +41,16 @@ void Server::AcceptConnections(){
 }
 
 void Server::SendMessages(){
+
   while (running){
+    if (newSockets.size() != 0) {
+      int clientSocket = newSockets.front();
+      int sent = SendWelcomeMessage(clientSocket);
+      std::cout << "Sent message with code: " << sent << std::endl;
+      newSockets.pop_front();
+      sockets.push_back(clientSocket);
+    }
     
-    if (newSockets.size() == 0) continue;
-
-    int clientSocket = newSockets.front();
-
-    // send a message over
-    std::string strmsg = "Server says Hey!";
-    const char* msg = strmsg.c_str();
-    int len, bytes_sent;
-
-    len = strlen(msg);
-    bytes_sent = send(clientSocket, "Hey from server", len, 0);
-
-    if (bytes_sent != len){
-      std::cout << "The whole message wasn't quite sent!" << std::endl;
-    }
-    else {
-      std::cout << "Sent message" << std::endl;
-    }
-
-    char response[1024] = {0};
-
-    int bytes_recieved = -1;
-
-    while (bytes_recieved <= 0){
-      bytes_recieved = recv(clientSocket, response, sizeof(response), 0);
-    }
-
-    std::cout << "From socket " << clientSocket << ": " << response << std::endl;
-
-    newSockets.pop_front();
-    sockets.push_back(clientSocket);
 
     //  shut down:
     // status = shutdown(clientSocket, SD_BOTH);
@@ -85,6 +62,36 @@ void Server::SendMessages(){
 
     // cp_close(clientSocket);
   }
+}
+
+int Server::SendWelcomeMessage(int clientSocket){
+  // send a message over
+  std::string strmsg = "Server says Hey!";
+  const char* msg = strmsg.c_str();
+  int len, bytes_sent;
+
+  len = strlen(msg);
+  bytes_sent = send(clientSocket, msg, len, 0);
+
+  if (bytes_sent != len){
+    std::cout << "The whole message wasn't quite sent!" << std::endl;
+    // return 1;
+  }
+  else {
+    std::cout << "Sent message" << std::endl;
+  }
+
+  char response[1024] = {0};
+
+  int bytes_recieved = -1;
+
+  while (bytes_recieved <= 0){
+    bytes_recieved = recv(clientSocket, response, sizeof(response), 0);
+  }
+
+  std::cout << "From socket " << clientSocket << ": " << response << std::endl;
+
+  return 0;
 }
 
 int Server::Init(){

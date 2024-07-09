@@ -6,6 +6,7 @@
 
 #include <list>
 #include <thread>
+#include <string>
 
 class Server {
 public:
@@ -16,6 +17,9 @@ private:
   int Init();
   void AcceptConnections();
   void SendMessages();
+
+  int SendWelcomeMessage(int newSocket);
+  int SendToAll(std::string msg){};
 
   void Stop(){ running = false; }
 
