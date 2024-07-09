@@ -11,34 +11,41 @@
 #include <chrono>
 #include <queue>
 
-class Server {
-public:
-  Server();
-  ~Server();
+namespace remora {
 
-  int QueueMessageToBeSent(std::string msg){ messagesToBeSent.push(msg); };
+  class RemoraMessenger;
 
-private:
-  int Init();
-  void AcceptConnections();
-  void SendMessages();
+	class Server {
+	public:
+		Server();
+		~Server();
 
-  int SendWelcomeMessage(int newSocket);
-  int SendToAll(std::string msg);
+		void QueueMessageToBeSent(std::string msg) { messagesToBeSent.push(msg); };
 
-  void Stop(){ running = false; }
+	private:
+		int Init();
+		void AcceptConnections();
+		void SendMessages();
 
-  int listenSocket;
+		int SendWelcomeMessage(int newSocket);
+		int SendToAll(std::string msg);
 
-  std::list<int> newSockets;
-  std::list<int> sockets;
+		void Stop() { running = false; }
 
-  std::thread listenThread;
-  std::thread sendDataThread;
+		int listenSocket;
 
-  std::queue<std::string> messagesToBeSent;
+		std::list<int> newSockets;
+		std::list<int> sockets;
 
-  bool running = true;
+		std::thread listenThread;
+		std::thread sendDataThread;
+
+		std::queue<std::string> messagesToBeSent;
+
+		bool running = true;
+
+		RemoraMessenger* remoraMessenger;
+	};
 };
 
 #endif // ! CP_SERVER_HH

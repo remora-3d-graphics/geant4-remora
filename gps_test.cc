@@ -10,6 +10,7 @@
 #include "cp_server.hh"
 
 using namespace gps_test;
+using namespace remora;
 
 // TODO:
 // 1. Get the Action Initialization, Physics list,
