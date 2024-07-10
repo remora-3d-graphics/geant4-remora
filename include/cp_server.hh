@@ -13,6 +13,7 @@
 
 // Geant4 includes
 #include "G4RunManager.hh"
+#include "G4RunManagerFactory.hh"
 
 namespace remora {
 

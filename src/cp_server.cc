@@ -86,7 +86,7 @@ namespace remora {
 
   int Server::SendDetectors(int sock){
     // get world from runManager
-    G4VPhysicalVolume* world = pRunManager->GetCurrentWorld();
+    const G4VPhysicalVolume *world = G4RunManagerFactory::GetMasterRunManagerKernel()->GetCurrentWorld();
 
     std::cout << "World ptr: " << world << std::endl;
     if (!world){
