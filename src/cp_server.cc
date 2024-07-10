@@ -54,6 +54,11 @@ namespace remora {
         int clientSocket = newSockets.front();
         int sent = SendWelcomeMessage(clientSocket);
         std::cout << "Sent message with code: " << sent << std::endl;
+
+        // send detectors
+        sent = SendDetectors(clientSocket);
+        std::cout << "Sent detectors with code: " << sent << std::endl;
+
         newSockets.pop_front();
         sockets.push_back(clientSocket);
       }
@@ -74,6 +79,26 @@ namespace remora {
 
       // cp_close(clientSocket);
     }
+  }
+
+  int Server::SendDetectors(int sock){
+    // get detectors from runmanager
+    G4RunManager* runManager = G4RunManager::GetRunManager();
+    if (!runManager){
+      std::cout << "REMORA: Run Manager Not initialized!" << std::endl;
+      return 1;
+    }
+
+    auto detConst = runManager->GetUserDetectorConstruction();
+    if (!detConst){
+      std::cout << "REMORA: User det const Not initialized!" << std::endl;
+      return 1;
+    }
+
+    
+    // convert them to json and send
+    
+    return 0;
   }
 
   int Server::SendToAll(std::string strmsg) {
