@@ -23,5 +23,8 @@ docker run --rm -p 8080:8080 -it remora_g4
 - Server checks if error == 0 and if bytes_received is equal
 - Server tries again a few times and then disconnects the socket
 
+# Issues:
+- [ ] Geant4 app can't quit, I think because of the server running. 
+
 # Acknowledgements
 - This product includes software developed by Members of the [Geant4 Collaboration](http://cern.ch/geant4).
