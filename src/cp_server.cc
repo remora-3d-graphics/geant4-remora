@@ -2,7 +2,7 @@
 #include "RemoraG4Messenger.hh"
 
 namespace remora {
-  Server::Server() {
+  Server::Server(G4RunManager* runManager) : pRunManager(runManager) {
     std::cout << "Hello Server" << std::endl;
 
     // initialize the messenger
@@ -83,13 +83,7 @@ namespace remora {
 
   int Server::SendDetectors(int sock){
     // get detectors from runmanager
-    G4RunManager* runManager = G4RunManager::GetRunManager();
-    if (!runManager){
-      std::cout << "REMORA: Run Manager Not initialized!" << std::endl;
-      return 1;
-    }
-
-    auto detConst = runManager->GetUserDetectorConstruction();
+    auto detConst = pRunManager->GetUserDetectorConstruction();
     if (!detConst){
       std::cout << "REMORA: User det const Not initialized!" << std::endl;
       return 1;

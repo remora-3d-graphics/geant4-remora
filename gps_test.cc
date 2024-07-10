@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	else {
 
     // start server
-    Server server;
+    Server server(runManager);
 
 		// use UI
 		ui->SessionStart();

@@ -20,7 +20,7 @@ namespace remora {
 
 	class Server {
 	public:
-		Server();
+		Server(G4RunManager* runManager);
 		~Server();
 
 		void QueueMessageToBeSent(std::string msg) { messagesToBeSent.push(msg); };
@@ -51,6 +51,7 @@ namespace remora {
 		bool running = true;
 
 		RemoraMessenger* remoraMessenger;
+    G4RunManager* pRunManager;
 	};
 };
 
