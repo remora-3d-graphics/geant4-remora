@@ -11,6 +11,10 @@
 #include <chrono>
 #include <queue>
 
+// Geant4 includes
+#include "G4RunManager.hh"
+#include "G4RunManagerFactory.hh"
+
 namespace remora {
 
   class RemoraMessenger;
@@ -27,10 +31,13 @@ namespace remora {
 		void AcceptConnections();
 		void SendMessages();
 
+		void Stop() { running = false; }
+
 		int SendWelcomeMessage(int newSocket);
 		int SendToAll(std::string msg);
 
-		void Stop() { running = false; }
+    int SendDetectors(int sock);
+    int SendTracks(){ return 0; };
 
 		int listenSocket;
 

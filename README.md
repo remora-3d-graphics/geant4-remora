@@ -16,6 +16,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] client side: if server disconnects, disconnect as well. 
 - [ ] Error handling for sending and receiving messages
 - [ ] Basically graceful disconnection needs to be addressed from server and client sides.
+- [ ] If a socket joins before runManager is initialized, make sure they can get the detectors once it initializes.
 
 ## Message format:
 - From server: (saves # bytes in message) `{Json_string}`
@@ -24,7 +25,8 @@ docker run --rm -p 8080:8080 -it remora_g4
 - Server tries again a few times and then disconnects the socket
 
 # Issues:
-- [ ] Geant4 app can't quit, I think because of the server running. 
+- [ ] Geant4 app can't quit, I think because of the server running. Maybe because the messenger is still there?
+- [x] Even using the public version of the runManager, we can't get the world object. Fixed using RunManagerFactory
 
 # Acknowledgements
 - This product includes software developed by Members of the [Geant4 Collaboration](http://cern.ch/geant4).

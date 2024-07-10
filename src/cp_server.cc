@@ -54,6 +54,11 @@ namespace remora {
         int clientSocket = newSockets.front();
         int sent = SendWelcomeMessage(clientSocket);
         std::cout << "Sent message with code: " << sent << std::endl;
+
+        // send detectors
+        sent = SendDetectors(clientSocket);
+        std::cout << "Sent detectors with code: " << sent << std::endl;
+
         newSockets.pop_front();
         sockets.push_back(clientSocket);
       }
@@ -74,6 +79,21 @@ namespace remora {
 
       // cp_close(clientSocket);
     }
+  }
+
+  int Server::SendDetectors(int sock){
+    // get world from runManager. Note: got this line from G4VisManager.hh
+    const G4VPhysicalVolume *world = G4RunManagerFactory::GetMasterRunManagerKernel()->GetCurrentWorld();
+
+    std::cout << "World ptr: " << world << std::endl;
+    if (!world){
+      std::cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << std::endl;
+      return 1;
+    }
+    
+    // convert them to json and send
+    
+    return 0;
   }
 
   int Server::SendToAll(std::string strmsg) {
