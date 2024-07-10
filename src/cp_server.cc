@@ -2,11 +2,8 @@
 #include "RemoraG4Messenger.hh"
 
 namespace remora {
-  Server::Server(G4RunManager* runManager) {
+  Server::Server() {
     std::cout << "Hello Server" << std::endl;
-
-    // make run manager public
-    pRunManager = static_cast<PubWorldRunManager*>(runManager);
 
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
@@ -85,12 +82,12 @@ namespace remora {
   }
 
   int Server::SendDetectors(int sock){
-    // get world from runManager
+    // get world from runManager. Note: got this line from G4VisManager.hh
     const G4VPhysicalVolume *world = G4RunManagerFactory::GetMasterRunManagerKernel()->GetCurrentWorld();
 
     std::cout << "World ptr: " << world << std::endl;
     if (!world){
-      std::cout << "REMORA: Can't get world!" << std::endl;
+      std::cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << std::endl;
       return 1;
     }
     

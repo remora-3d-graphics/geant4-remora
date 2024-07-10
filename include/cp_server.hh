@@ -17,17 +17,11 @@
 
 namespace remora {
 
-  class PubWorldRunManager : public G4RunManager{
-  // just here to get public access to the currentWorld ptr.
-  public:
-    G4VPhysicalVolume* GetCurrentWorld() { return this->currentWorld; }
-  };
-
   class RemoraMessenger;
 
 	class Server {
 	public:
-		Server(G4RunManager* runManager);
+		Server();
 		~Server();
 
 		void QueueMessageToBeSent(std::string msg) { messagesToBeSent.push(msg); };
@@ -58,7 +52,6 @@ namespace remora {
 		bool running = true;
 
 		RemoraMessenger* remoraMessenger;
-    PubWorldRunManager* pRunManager;
 	};
 };
 
