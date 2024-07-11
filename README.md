@@ -12,6 +12,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 
 
 # Todo:
+- [ ] Make a client recv thread and send thread. The issue is that the server waits to hear back from the client.
 - [ ] If a socket disconnects, make sure and remove it from the sockets list
 - [ ] client side: if server disconnects, disconnect as well. 
 - [ ] Error handling for sending and receiving messages
