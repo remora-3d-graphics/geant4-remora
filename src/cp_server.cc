@@ -121,12 +121,10 @@ namespace remora {
 
   int Server::SendWelcomeMessage(int clientSocket) {
     // send a message over
-    std::string strmsg = "Server says Hey!";
-    const char* msg = strmsg.c_str();
-    int len, bytes_sent;
+    std::string msg = "Welcome";
 
-    len = strlen(msg);
-    bytes_sent = send(clientSocket, msg, len, 0);
+    int len = msg.size();
+    int bytes_sent = send(clientSocket, msg.data(), len, 0);
 
     if (bytes_sent != len) {
       std::cout << "The whole message wasn't quite sent!" << std::endl;
