@@ -15,6 +15,7 @@
 // Geant4 includes
 #include "G4RunManager.hh"
 #include "G4RunManagerFactory.hh"
+#include "G4Point3D.hh"
 
 using json = nlohmann::json;
 
