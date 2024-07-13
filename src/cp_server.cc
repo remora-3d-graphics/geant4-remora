@@ -129,7 +129,13 @@ namespace remora {
     G4Point3D edge[2];
     G4int flags = 0;
     while (polyhedron->GetNextEdge(edge[0], edge[1], flags)) {
-        edges.push_back(std::make_pair(edge[0], edge[1]));
+      edges.push_back(std::make_pair(edge[0], edge[1]));
+    }
+
+    std::vector<std::pair<G4int, G4int>> edgeIndices;
+    G4int edgei[2];
+    while (polyhedron->GetNextEdgeIndices(edgei[0], edgei[1], flags)){
+      edgeIndices.push_back(std::make_pair(edgei[0], edgei[1]));
     }
 
     // Output vertices
@@ -141,6 +147,12 @@ namespace remora {
     // Output edges
     std::cout << "Edges:\n";
     for (const auto& edge : edges) {
+        std::cout << edge.first << " <-> " << edge.second << "\n";
+    }
+
+    // Output edge indices
+    std::cout << "Edge indices:\n";
+    for (const auto& edge : edgeIndices) {
         std::cout << edge.first << " <-> " << edge.second << "\n";
     }
 
