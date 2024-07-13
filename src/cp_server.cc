@@ -92,6 +92,16 @@ namespace remora {
     }
     
     // convert them to json and send
+    G4String testShape = "{\"physShape\":\
+{\"vertices\":[[100, 100, 100],[100, 200, 100],[200, 200, 100],[200,100,100],\
+[100, 100, 200],[100, 200, 200],[200, 200, 200],[200,100,250]],\
+\"indices\":[[0, 1],[1, 2],[2, 3],[3,0],\
+[4, 5],[5, 6],[6, 7],[7,4],\
+[0, 4],[1, 5],[2, 6],[3,7]\
+]}}";
+    G4String cmd = "AddShapes" + testShape;
+
+    QueueMessageToBeSent(cmd);
     
     return 0;
   }
