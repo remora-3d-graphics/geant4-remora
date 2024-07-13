@@ -116,48 +116,53 @@ namespace remora {
     json solidJson;
 
     G4Polyhedron* polyhedron = solid->CreatePolyhedron();
-    
+        
+    // lambda function to convert double into int then string
+    auto format = [](G4double d){
+      return std::to_string(static_cast<int>(d));
+    };
+
+    // create JSON:
+    std::string theJson = "{\"vertices\":[";
+
     // Get vertices
     G4int numVertices = polyhedron->GetNoVertices();
-    std::vector<G4ThreeVector> vertices;
     for (G4int i=1; i < numVertices; i++) {
-      vertices.push_back(polyhedron->GetVertex(i));
+      theJson += "[";
+      theJson += format(polyhedron->GetVertex(i).x());
+      theJson += ",";
+      theJson += format(polyhedron->GetVertex(i).y());
+      theJson += ",";
+      theJson += format(polyhedron->GetVertex(i).z());
+      if (i == numVertices - 1){ 
+        // the last one
+        theJson += "]";
+      } else {
+        theJson += "],";
+      }
     }
+    theJson += "],";
 
-    // Get edges (connections)
-    std::vector<std::pair<G4Point3D, G4Point3D>> edges;
-    G4Point3D edge[2];
-    G4int flags = 0;
-    while (polyhedron->GetNextEdge(edge[0], edge[1], flags)) {
-      edges.push_back(std::make_pair(edge[0], edge[1]));
-    }
+    theJson += "\"indices\":[";
 
+    // get indices of edge connections
     std::vector<std::pair<G4int, G4int>> edgeIndices;
+    G4int flags = 0;
     G4int edgei[2];
     while (polyhedron->GetNextEdgeIndices(edgei[0], edgei[1], flags)){
-      edgeIndices.push_back(std::make_pair(edgei[0], edgei[1]));
+      theJson += "[";
+      theJson += std::to_string(edgei[0]);
+      theJson += ",";
+      theJson += std::to_string(edgei[1]);
+      theJson += "],";
     }
+    // get rid of that last comma
+    theJson.pop_back();
 
-    // Output vertices
-    std::cout << "Vertices:\n";
-    for (const auto& vertex : vertices) {
-        std::cout << vertex << "\n";
-    }
+    theJson += "]}";
 
-    // Output edges
-    std::cout << "Edges:\n";
-    for (const auto& edge : edges) {
-        std::cout << edge.first << " <-> " << edge.second << "\n";
-    }
-
-    // Output edge indices
-    std::cout << "Edge indices:\n";
-    for (const auto& edge : edgeIndices) {
-        std::cout << edge.first << " <-> " << edge.second << "\n";
-    }
-
-    // TODO: RETURN JSON HERE!!!
-
+    solidJson = json::parse(theJson);
+    return solidJson;
   }
 
   int Server::SendToAll(std::string strmsg) {
