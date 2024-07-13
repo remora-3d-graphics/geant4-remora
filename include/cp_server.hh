@@ -16,6 +16,8 @@
 #include "G4RunManager.hh"
 #include "G4RunManagerFactory.hh"
 #include "G4Point3D.hh"
+#include "G4VSolid.hh"
+#include "G4Polyhedron.hh"
 
 using json = nlohmann::json;
 
@@ -41,6 +43,8 @@ namespace remora {
 		int SendToAll(std::string msg);
 
     int SendDetectors(int sock=-1);
+    json GetJsonFromSolid(const G4VSolid* solid);
+
     int SendTracks(){ return 0; };
 
 		int listenSocket;

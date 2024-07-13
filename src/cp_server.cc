@@ -89,10 +89,11 @@ namespace remora {
     for (int i=0; i<nChildren; i++){
       G4VPhysicalVolume* volume = world->GetLogicalVolume()->GetDaughter(i);
       G4String name = volume->GetName();
-      G4String type = volume->GetLogicalVolume()->GetSolid()->GetEntityType();
+      json shapeJson = GetJsonFromSolid(volume->GetLogicalVolume()->GetSolid());
 
-      std::cout << "The type is: " << type;
+      allShapes[name] = shapeJson;
     }
+    std::cout << allShapes << std::endl;
     
     // convert them to json and send
     G4String testShape = "{\"physShape\":\
@@ -109,6 +110,42 @@ namespace remora {
     }
 
     return 0;
+  }
+
+  json Server::GetJsonFromSolid(const G4VSolid* solid){
+    json solidJson;
+
+    G4Polyhedron* polyhedron = solid->CreatePolyhedron();
+    
+    // Get vertices
+    G4int numVertices = polyhedron->GetNoVertices();
+    std::vector<G4ThreeVector> vertices;
+    for (G4int i=1; i < numVertices; i++) {
+      vertices.push_back(polyhedron->GetVertex(i));
+    }
+
+    // Get edges (connections)
+    std::vector<std::pair<G4Point3D, G4Point3D>> edges;
+    G4Point3D edge[2];
+    G4int flags = 0;
+    while (polyhedron->GetNextEdge(edge[0], edge[1], flags)) {
+        edges.push_back(std::make_pair(edge[0], edge[1]));
+    }
+
+    // Output vertices
+    std::cout << "Vertices:\n";
+    for (const auto& vertex : vertices) {
+        std::cout << vertex << "\n";
+    }
+
+    // Output edges
+    std::cout << "Edges:\n";
+    for (const auto& edge : edges) {
+        std::cout << edge.first << " <-> " << edge.second << "\n";
+    }
+
+    // TODO: RETURN JSON HERE!!!
+
   }
 
   int Server::SendToAll(std::string strmsg) {
