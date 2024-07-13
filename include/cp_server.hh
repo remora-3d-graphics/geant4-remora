@@ -43,6 +43,7 @@ namespace remora {
 		int SendToAll(std::string msg);
 
     int SendDetectors(int sock=-1);
+    int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
     json GetJsonFromSolid(const G4VSolid* solid);
 
     int SendTracks(){ return 0; };

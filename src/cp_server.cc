@@ -82,27 +82,29 @@ namespace remora {
       return 1;
     }
 
-    // get all children of the world and put them in json
-    json allShapes;
-
     size_t nChildren = world->GetLogicalVolume()->GetNoDaughters();
     for (int i=0; i<nChildren; i++){
       G4VPhysicalVolume* volume = world->GetLogicalVolume()->GetDaughter(i);
+      SendOneDetector(volume, sock);
+    }
+
+    return 0;
+  }
+
+  int Server::SendOneDetector(G4VPhysicalVolume* volume, int sock){
+    if (sock == -1){ // send to all
+      json wrapper;
+
       G4String name = volume->GetName();
       json shapeJson = GetJsonFromSolid(volume->GetLogicalVolume()->GetSolid());
+      wrapper[name] = shapeJson;
 
-      allShapes[name] = shapeJson;
-    }
+      // debug print
+      std::cout << wrapper << std::endl;
 
-    // output for debug
-    std::cout << allShapes << std::endl;
-
-    G4String cmd = "AddShapes" + allShapes.dump();
-
-    if (sock == -1){ // send to all if not specified
+      G4String cmd = "AddShapes" + wrapper.dump();
       QueueMessageToBeSent(cmd);
     }
-
     return 0;
   }
 
