@@ -81,6 +81,18 @@ namespace remora {
       std::cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << std::endl;
       return 1;
     }
+
+    // get all children of the world and put them in json
+    json allShapes;
+
+    size_t nChildren = world->GetLogicalVolume()->GetNoDaughters();
+    for (int i=0; i<nChildren; i++){
+      G4VPhysicalVolume* volume = world->GetLogicalVolume()->GetDaughter(i);
+      G4String name = volume->GetName();
+      G4String type = volume->GetLogicalVolume()->GetSolid()->GetEntityType();
+
+      std::cout << "The type is: " << type;
+    }
     
     // convert them to json and send
     G4String testShape = "{\"physShape\":\

@@ -1,9 +1,10 @@
 #ifndef CP_SERVER_HH
 #define CP_SERVER_HH
 
-#include <iostream>
 #include "cross_platform_sockets.hh"
+#include "json.hpp"
 
+#include <iostream>
 #include <list>
 #include <thread>
 #include <string>
@@ -14,6 +15,8 @@
 // Geant4 includes
 #include "G4RunManager.hh"
 #include "G4RunManagerFactory.hh"
+
+using json = nlohmann::json;
 
 namespace remora {
 
