@@ -8,6 +8,7 @@ namespace remora {
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
 
+    // currently the Init() function blocks Geant4 execution. TODO: put it on a thread
     if (Init() != 0) {
       std::cout
         << "Server did not initialize properly. "
@@ -50,32 +51,22 @@ namespace remora {
   void Server::SendMessages() {
 
     while (running) {
+      // for new sockets
       if (newSockets.size() != 0) {
         int clientSocket = newSockets.front();
         int sent = SendWelcomeMessage(clientSocket);
         std::cout << "Sent message with code: " << sent << std::endl;
-
-        // send detectors
-        sent = SendDetectors(clientSocket);
-        std::cout << "Sent detectors with code: " << sent << std::endl;
-
         newSockets.pop_front();
         sockets.push_back(clientSocket);
       }
 
-      // std::ostringstream oss;
-      // oss << "There are currently: " << sockets.size() << " clients.";
-      // std::string msg = oss.str();
+      // send detectors ONLY when run is initialized
 
-      // std::string msg = "SetTitleHello World.";
 
       if (messagesToBeSent.size() > 0) {
         SendToAll(messagesToBeSent.front());
         messagesToBeSent.pop();
       }
-
-      // pause for a few seconds
-      // std::this_thread::sleep_for(std::chrono::seconds(5));
 
       // cp_close(clientSocket);
     }
@@ -90,20 +81,86 @@ namespace remora {
       std::cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << std::endl;
       return 1;
     }
-    
-    // convert them to json and send
-    G4String testShape = "{\"physShape\":\
-{\"vertices\":[[100, 100, 100],[100, 200, 100],[200, 200, 100],[200,100,100],\
-[100, 100, 200],[100, 200, 200],[200, 200, 200],[200,100,250]],\
-\"indices\":[[0, 1],[1, 2],[2, 3],[3,0],\
-[4, 5],[5, 6],[6, 7],[7,4],\
-[0, 4],[1, 5],[2, 6],[3,7]\
-]}}";
-    G4String cmd = "AddShapes" + testShape;
 
-    QueueMessageToBeSent(cmd);
-    
+    // get all children of the world and put them in json
+    json allShapes;
+
+    size_t nChildren = world->GetLogicalVolume()->GetNoDaughters();
+    for (int i=0; i<nChildren; i++){
+      G4VPhysicalVolume* volume = world->GetLogicalVolume()->GetDaughter(i);
+      G4String name = volume->GetName();
+      json shapeJson = GetJsonFromSolid(volume->GetLogicalVolume()->GetSolid());
+
+      allShapes[name] = shapeJson;
+    }
+
+    // output for debug
+    std::cout << allShapes << std::endl;
+
+    G4String cmd = "AddShapes" + allShapes.dump();
+
+    if (sock == -1){ // send to all if not specified
+      QueueMessageToBeSent(cmd);
+    }
+
     return 0;
+  }
+
+  json Server::GetJsonFromSolid(const G4VSolid* solid){
+    json solidJson;
+
+    G4Polyhedron* polyhedron = solid->CreatePolyhedron();
+        
+    // lambda function to convert double into int then string
+    auto format = [](G4double d){
+      return std::to_string(static_cast<int>(d));
+    };
+
+    // create JSON:
+    std::string theJson = "{\"vertices\":[";
+
+    // Get vertices
+    G4int numVertices = polyhedron->GetNoVertices();
+    // note: vertices are one indexed
+    for (G4int i=1; i < numVertices+1; i++) {
+      theJson += "[";
+      theJson += format(polyhedron->GetVertex(i).x());
+      theJson += ",";
+      theJson += format(polyhedron->GetVertex(i).y());
+      theJson += ",";
+      theJson += format(polyhedron->GetVertex(i).z());
+      if (i == numVertices){ 
+        // the last one
+        theJson += "]";
+      } else {
+        theJson += "],";
+      }
+    }
+    theJson += "],";
+
+    theJson += "\"indices\":[";
+
+    // get indices of edge connections
+    // ISSUE HERE" There are only 6 vertices and 
+    // the indices go up to 8. They may be 1 indexed..
+    std::vector<std::pair<G4int, G4int>> edgeIndices;
+    G4int flags = 0;
+    G4int edgei[2];
+    while (polyhedron->GetNextEdgeIndices(edgei[0], edgei[1], flags)){
+      theJson += "[";
+      // note the -1 because these are 1 indexed
+      theJson += std::to_string(edgei[0]-1);
+      theJson += ",";
+      theJson += std::to_string(edgei[1]-1);
+      theJson += "],";
+    }
+    // get rid of that last comma
+    theJson.pop_back();
+
+    theJson += "]}";
+
+    solidJson = json::parse(theJson);
+    return solidJson;
   }
 
   int Server::SendToAll(std::string strmsg) {

@@ -1,9 +1,10 @@
 #ifndef CP_SERVER_HH
 #define CP_SERVER_HH
 
-#include <iostream>
 #include "cross_platform_sockets.hh"
+#include "json.hpp"
 
+#include <iostream>
 #include <list>
 #include <thread>
 #include <string>
@@ -14,6 +15,11 @@
 // Geant4 includes
 #include "G4RunManager.hh"
 #include "G4RunManagerFactory.hh"
+#include "G4Point3D.hh"
+#include "G4VSolid.hh"
+#include "G4Polyhedron.hh"
+
+using json = nlohmann::json;
 
 namespace remora {
 
@@ -36,7 +42,9 @@ namespace remora {
 		int SendWelcomeMessage(int newSocket);
 		int SendToAll(std::string msg);
 
-    int SendDetectors(int sock);
+    int SendDetectors(int sock=-1);
+    json GetJsonFromSolid(const G4VSolid* solid);
+
     int SendTracks(){ return 0; };
 
 		int listenSocket;
@@ -50,8 +58,11 @@ namespace remora {
 		std::queue<std::string> messagesToBeSent;
 
 		bool running = true;
+    bool g4runInitialized = false;
 
 		RemoraMessenger* remoraMessenger;
+
+    friend class RemoraMessenger;
 	};
 };
 
