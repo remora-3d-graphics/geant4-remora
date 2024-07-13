@@ -93,6 +93,10 @@ namespace remora {
 
       allShapes[name] = shapeJson;
     }
+
+    // output for debug
+    std::cout << allShapes << std::endl;
+
     G4String cmd = "AddShapes" + allShapes.dump();
 
     if (sock == -1){ // send to all if not specified

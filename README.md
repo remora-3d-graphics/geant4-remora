@@ -85,6 +85,7 @@ The following is from HepPolydedron
 # Issues:
 - [ ] Geant4 app can't quit, I think because of the server running. Maybe because the messenger is still there?
 - [x] Even using the public version of the runManager, we can't get the world object. Fixed using RunManagerFactory
+- [ ] If the shape json is too long (e.g. G4Sphere) the connection needs to be able to receive the whole thing. The client can't get the whole thing in time and it crashes. This means the server needs to send it in chunks.
 
 # Acknowledgements
 - This product includes software developed by Members of the [Geant4 Collaboration](http://cern.ch/geant4).
