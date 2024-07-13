@@ -3,6 +3,7 @@
 
 #include "G4UImessenger.hh"
 #include "G4UIcmdWithAString.hh"
+#include "G4UIcmdWithoutParameter.hh"
 
 #include "cp_server.hh"
 
@@ -22,6 +23,7 @@ namespace remora {
 
 		G4UIdirectory* fDirectory;
 		G4UIcmdWithAString* fChangeTitleCmd;
+    G4UIcmdWithoutParameter* fSendDetectorsCmd;
 	
 	};
 }

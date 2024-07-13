@@ -8,6 +8,7 @@ namespace remora {
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
 
+    // currently the Init() function blocks Geant4 execution. TODO: put it on a thread
     if (Init() != 0) {
       std::cout
         << "Server did not initialize properly. "
@@ -50,32 +51,22 @@ namespace remora {
   void Server::SendMessages() {
 
     while (running) {
+      // for new sockets
       if (newSockets.size() != 0) {
         int clientSocket = newSockets.front();
         int sent = SendWelcomeMessage(clientSocket);
         std::cout << "Sent message with code: " << sent << std::endl;
-
-        // send detectors
-        sent = SendDetectors(clientSocket);
-        std::cout << "Sent detectors with code: " << sent << std::endl;
-
         newSockets.pop_front();
         sockets.push_back(clientSocket);
       }
 
-      // std::ostringstream oss;
-      // oss << "There are currently: " << sockets.size() << " clients.";
-      // std::string msg = oss.str();
+      // send detectors ONLY when run is initialized
 
-      // std::string msg = "SetTitleHello World.";
 
       if (messagesToBeSent.size() > 0) {
         SendToAll(messagesToBeSent.front());
         messagesToBeSent.pop();
       }
-
-      // pause for a few seconds
-      // std::this_thread::sleep_for(std::chrono::seconds(5));
 
       // cp_close(clientSocket);
     }
@@ -101,8 +92,10 @@ namespace remora {
 ]}}";
     G4String cmd = "AddShapes" + testShape;
 
-    QueueMessageToBeSent(cmd);
-    
+    if (sock == -1){ // send to all if not specified
+      QueueMessageToBeSent(cmd);
+    }
+
     return 0;
   }
 

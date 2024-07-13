@@ -36,7 +36,7 @@ namespace remora {
 		int SendWelcomeMessage(int newSocket);
 		int SendToAll(std::string msg);
 
-    int SendDetectors(int sock);
+    int SendDetectors(int sock=-1);
     int SendTracks(){ return 0; };
 
 		int listenSocket;
@@ -50,8 +50,11 @@ namespace remora {
 		std::queue<std::string> messagesToBeSent;
 
 		bool running = true;
+    bool g4runInitialized = false;
 
 		RemoraMessenger* remoraMessenger;
+
+    friend class RemoraMessenger;
 	};
 };
 

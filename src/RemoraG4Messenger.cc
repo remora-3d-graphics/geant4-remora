@@ -6,6 +6,7 @@ namespace remora {
 		fDirectory = new G4UIdirectory("/remora/");
 	
 		fChangeTitleCmd = new G4UIcmdWithAString("/remora/setTitle", this);
+    fSendDetectorsCmd = new G4UIcmdWithoutParameter("/remora/sendDetectors", this);
 
 	}
 
@@ -14,5 +15,8 @@ namespace remora {
 			G4String setTitleCommand = "SetTitle" + newValues;
 			serverPtr->QueueMessageToBeSent(setTitleCommand);
 		}
+    if (cmd == fSendDetectorsCmd){
+      serverPtr->SendDetectors();
+    }
 	}
 }
