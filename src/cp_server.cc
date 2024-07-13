@@ -93,17 +93,7 @@ namespace remora {
 
       allShapes[name] = shapeJson;
     }
-    std::cout << allShapes << std::endl;
-    
-    // convert them to json and send
-    G4String testShape = "{\"physShape\":\
-{\"vertices\":[[100, 100, 100],[100, 200, 100],[200, 200, 100],[200,100,100],\
-[100, 100, 200],[100, 200, 200],[200, 200, 200],[200,100,250]],\
-\"indices\":[[0, 1],[1, 2],[2, 3],[3,0],\
-[4, 5],[5, 6],[6, 7],[7,4],\
-[0, 4],[1, 5],[2, 6],[3,7]\
-]}}";
-    G4String cmd = "AddShapes" + testShape;
+    G4String cmd = "AddShapes" + allShapes.dump();
 
     if (sock == -1){ // send to all if not specified
       QueueMessageToBeSent(cmd);
@@ -127,14 +117,15 @@ namespace remora {
 
     // Get vertices
     G4int numVertices = polyhedron->GetNoVertices();
-    for (G4int i=1; i < numVertices; i++) {
+    // note: vertices are one indexed
+    for (G4int i=1; i < numVertices+1; i++) {
       theJson += "[";
       theJson += format(polyhedron->GetVertex(i).x());
       theJson += ",";
       theJson += format(polyhedron->GetVertex(i).y());
       theJson += ",";
       theJson += format(polyhedron->GetVertex(i).z());
-      if (i == numVertices - 1){ 
+      if (i == numVertices){ 
         // the last one
         theJson += "]";
       } else {
@@ -146,14 +137,17 @@ namespace remora {
     theJson += "\"indices\":[";
 
     // get indices of edge connections
+    // ISSUE HERE" There are only 6 vertices and 
+    // the indices go up to 8. They may be 1 indexed..
     std::vector<std::pair<G4int, G4int>> edgeIndices;
     G4int flags = 0;
     G4int edgei[2];
     while (polyhedron->GetNextEdgeIndices(edgei[0], edgei[1], flags)){
       theJson += "[";
-      theJson += std::to_string(edgei[0]);
+      // note the -1 because these are 1 indexed
+      theJson += std::to_string(edgei[0]-1);
       theJson += ",";
-      theJson += std::to_string(edgei[1]);
+      theJson += std::to_string(edgei[1]-1);
       theJson += "],";
     }
     // get rid of that last comma
