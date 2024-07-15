@@ -34,7 +34,7 @@ namespace remora {
 
   void Server::QueueMessageToBeSent(std::string msg){
     // enforce the wrapper
-    
+
     std::ostringstream oss;
     oss << "REMORA(" << msg << ")";
     std::string formattedString = oss.str();
@@ -200,7 +200,7 @@ namespace remora {
 
   int Server::SendWelcomeMessage(int clientSocket) {
     // send a message over
-    std::string msg = "Welcome";
+    std::string msg = "REMORA(Welcome)";
 
     int len = msg.size();
     int bytes_sent = send(clientSocket, msg.data(), len, 0);
