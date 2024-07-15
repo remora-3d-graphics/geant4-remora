@@ -30,7 +30,7 @@ namespace remora {
 		Server();
 		~Server();
 
-		void QueueMessageToBeSent(std::string msg) { messagesToBeSent.push(msg); };
+		void QueueMessageToBeSent(std::string msg);
 
 	private:
 		int Init();

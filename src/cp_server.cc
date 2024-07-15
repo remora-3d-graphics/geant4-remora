@@ -32,6 +32,16 @@ namespace remora {
     delete remoraMessenger;
   }
 
+  void Server::QueueMessageToBeSent(std::string msg){
+    // enforce the wrapper
+    
+    std::ostringstream oss;
+    oss << "REMORA(" << msg << ")";
+    std::string formattedString = oss.str();
+
+    messagesToBeSent.push(formattedString);
+  }
+
   void Server::AcceptConnections() {
     while (running) {
 

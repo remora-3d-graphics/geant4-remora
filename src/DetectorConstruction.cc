@@ -72,7 +72,17 @@ namespace gps_test {
       false,
       0
     );
-
+    G4Box* solidBox3 = new G4Box("solidBox3", 5*cm, 10*cm, 13*cm);
+    G4LogicalVolume* logicBox3 = new G4LogicalVolume(solidBox3, Ti, "logicBox3");
+    new G4PVPlacement(
+      nullptr,
+      G4ThreeVector(5*cm, 5*cm, -15*cm),
+      logicBox3,
+      "physBox3",
+      logicWorld,
+      false,
+      0
+    );
 
 		return physWorld;
 	}
