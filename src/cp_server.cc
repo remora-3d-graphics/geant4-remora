@@ -28,9 +28,9 @@ namespace remora {
 
   Server::~Server() {
     Stop();
-    // listenThread.join();
-    // allocatorThread.join();
-    // manageMessagesThread.join();
+    listenThread.join();
+    allocatorThread.join();
+    manageMessagesThread.join();
     // sendDataThread.join();
 
     delete remoraMessenger;
@@ -94,13 +94,20 @@ namespace remora {
         AddToNClientsReceived(1);
         attempts = 0;
       }
-      else if (attempts > 3){
+      else if (attempts > 6){
         // kill thread
         std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
         AddToNThreads(-1);
         std::cout << "Thread killed" << std::endl;
         break;
-      } 
+      }
+      else if (std::strcmp(buff, "bye") == 0){
+        // client wants to leave
+        std::cout << "Socket: " << sock << " disconnected." << std::endl;
+        AddToNThreads(-1);
+        std::cout << "Thread killed." << std::endl;
+        break;
+      }
       else {
         // try again
         std::cout << "ERROR: client said: " << buff << std::endl;
@@ -113,7 +120,12 @@ namespace remora {
     while (running){
       if (ViewNMessages() == 0) continue;
 
-      if (ViewNThreads() > 0 && ViewNThreads() == ViewNClientsReceived()) {
+      // clear out messages if there are no clients connected
+      if (ViewNThreads() == 0){
+        PopNextMessage();
+      }
+
+      if (ViewNThreads() == ViewNClientsReceived()) {
         // msg sent to all threads
         SetNClientsReceived(0);
         PopNextMessage();
@@ -127,6 +139,12 @@ namespace remora {
     std::ostringstream oss;
     oss << "REMORA(" << msg << ")";
     std::string formattedString = oss.str();
+
+    // make sure there are some clients
+    if (ViewNThreads() == 0){
+      std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
+      return;
+    }
 
     // mutex lock it
     std::lock_guard<std::mutex> lock(messageQueueMutex);
@@ -483,7 +501,7 @@ namespace remora {
 
     newClient = newSockets.front();
     newSockets.pop_front();
-    
+
     return newClient;
   }
 } // ! namespace remora
