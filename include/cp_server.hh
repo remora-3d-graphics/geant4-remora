@@ -46,6 +46,12 @@ namespace remora {
     int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
     json GetJsonFromSolid(const G4VSolid* solid);
 
+    void AllocateThreadsLoop();
+    int nThreads = 0;
+    int nClientsReceived = 0;
+    void ClientLoop(int sock);
+    void ManageMessagesLoop();
+
     int SendTracks(){ return 0; };
 
 		int listenSocket;
@@ -55,6 +61,8 @@ namespace remora {
 
 		std::thread listenThread;
 		std::thread sendDataThread;
+    std::thread allocatorThread;
+    std::thread manageMessagesThread;
 
 		std::queue<std::string> messagesToBeSent;
 

@@ -22,6 +22,8 @@ namespace remora {
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
     sendDataThread = std::thread(&Server::SendMessages, this);
+    allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
+    manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
   }
 
   Server::~Server() {
@@ -31,6 +33,57 @@ namespace remora {
 
     delete remoraMessenger;
   }
+
+  void Server::AllocateThreadsLoop(){
+    while (running){
+      if (newSockets.size() == 0) continue;
+
+      // allocate thread for new sockets
+      std::thread(&Server::ClientLoop, this, newSockets.front());
+      newSockets.pop_front();
+      nThreads++;
+    }
+  }
+
+  void Server::ClientLoop(int sock){
+    std::string lastMessageSent;
+    int attempts = 0;
+
+    while (running){
+      // send and then wait for response
+      if (messagesToBeSent.front() == lastMessageSent) continue;
+
+      send(sock, messagesToBeSent.front().data(), sizeof(messagesToBeSent.front().data()), 0);
+
+      char buff[10];
+      int bytesReceived = -1;
+
+      while (bytesReceived <= 0) {
+        bytesReceived = recv(sock, buff, sizeof(buff), 0);
+      }
+
+      if (buff == "REMORA(0)"){
+        // success!
+        lastMessageSent = messagesToBeSent.front();
+        nClientsReceived++;
+      }
+      else if (attempts > 3){
+        // kill thread
+        std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
+        nThreads--;
+        break;
+      } 
+      else {
+        // try again
+        attempts++;
+      }
+    }
+  }
+
+  void Server::ManageMessagesLoop(){
+    
+  }
+  
 
   void Server::QueueMessageToBeSent(std::string msg){
     // enforce the wrapper
