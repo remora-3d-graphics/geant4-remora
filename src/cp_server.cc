@@ -34,6 +34,66 @@ namespace remora {
     delete remoraMessenger;
   }
 
+  // Mutex management
+  int Server::ViewNMessages(){
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+
+    return messagesToBeSent.size();
+  }
+
+  std::string Server::ViewNextMessage(){
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+
+    if (messagesToBeSent.empty()){
+      return "";
+    }
+
+    return messagesToBeSent.front();
+  }
+
+  void Server::PopNextMessage(){
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+
+    if (messagesToBeSent.empty()){
+      std::cout << "Cant pop, message queue empty!" << std::endl;
+      return;
+    }
+
+    messagesToBeSent.pop();
+  }
+
+  int Server::ViewNThreads(){
+    std::lock_guard<std::mutex> lock(nThreadsMutex);
+  
+    return nThreads;
+  }
+
+  int Server::ViewNClientsReceived(){
+    std::lock_guard<std::mutex> lock(nClientsReceivedMutex);
+
+    return nClientsReceived;
+  }
+
+  void Server::AddToNThreads(int num){
+    std::lock_guard<std::mutex> lock(nThreadsMutex);
+
+    nThreads += num;
+  }
+
+  void Server::AddToNClientsReceived(int num){
+    std::lock_guard<std::mutex> lock(nClientsReceivedMutex);
+
+    nClientsReceived += num;
+  }
+
+  void Server::SetNClientsReceived(int num){
+    std::lock_guard<std::mutex> lock(nClientsReceivedMutex);
+
+    nClientsReceived = num;
+  }
+
+
+
   void Server::AllocateThreadsLoop(){
     while (running){
       if (newSockets.size() == 0) continue;

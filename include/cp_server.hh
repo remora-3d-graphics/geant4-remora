@@ -38,6 +38,8 @@ namespace remora {
 		void AcceptConnections();
 		void SendMessages();
 
+		int listenSocket;
+
 		void Stop() { running = false; }
 
 		int SendWelcomeMessage(int newSocket);
@@ -47,17 +49,29 @@ namespace remora {
     int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
     json GetJsonFromSolid(const G4VSolid* solid);
 
+    int SendTracks(){ return 0; };
+
+    // client thread stuff
     void AllocateThreadsLoop();
     int nThreads = 0;
     int nClientsReceived = 0;
     void ClientLoop(int sock);
     void ManageMessagesLoop();
+
     std::mutex messageQueueMutex;
-    std::mutex countersMutex;
+    std::mutex nThreadsMutex;
+    std::mutex nClientsReceivedMutex;
 
-    int SendTracks(){ return 0; };
+    // functions that need a mutex
+    int ViewNMessages();
+    std::string ViewNextMessage();
+    void PopNextMessage();
 
-		int listenSocket;
+    int ViewNThreads();
+    int ViewNClientsReceived();
+    void AddToNThreads(int num);
+    void AddToNClientsReceived(int num);
+    void SetNClientsReceived(int num);
 
 		std::list<int> newSockets;
 		std::list<int> sockets;
