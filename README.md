@@ -28,14 +28,18 @@ docker run --rm -p 8080:8080 -it remora_g4
 - Server tries again a few times and then disconnects the socket
 
 ## Need for mutexes:
-- int nThreads = 0;
-- int nClientsReceived = 0;
+- `int nThreads = 0;`
+- `int nClientsReceived = 0;`
+- `std::queue<std::string> messagesToBeSent;`
 
 # Issues:
 - [ ] Geant4 app can't quit, I think because of the server running. Maybe because the messenger is still there?
 - [x] Even using the public version of the runManager, we can't get the world object. Fixed using RunManagerFactory
 - [ ] If the shape json is too long (e.g. G4Sphere) the connection needs to be able to receive the whole thing. The client can't get the whole thing in time and it crashes. This means the server needs to send it in chunks.
 - [ ] TODO: FIGURE OUT HOW TO SEND IN CHUNKS. maybe the wrapper that the server sends has "CMD{JSON}DONE" or something and the client will keep receiving until "DONE" is read. 
+
+# Useful websites
+- [Helpful tips about mutexes](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)
 
 # Acknowledgements
 - This product includes software developed by Members of the [Geant4 Collaboration](http://cern.ch/geant4).

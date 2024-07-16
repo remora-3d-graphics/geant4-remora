@@ -53,6 +53,7 @@ namespace remora {
     void ClientLoop(int sock);
     void ManageMessagesLoop();
     std::mutex messageQueueMutex;
+    std::mutex countersMutex;
 
     int SendTracks(){ return 0; };
 
