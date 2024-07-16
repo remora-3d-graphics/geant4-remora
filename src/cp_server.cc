@@ -39,7 +39,7 @@ namespace remora {
       if (newSockets.size() == 0) continue;
 
       // allocate thread for new sockets
-      std::thread(&Server::ClientLoop, this, newSockets.front());
+      std::thread(&Server::ClientLoop, this, newSockets.front()).detach();
       newSockets.pop_front();
       nThreads++;
     }
@@ -48,6 +48,11 @@ namespace remora {
   void Server::ClientLoop(int sock){
     std::string lastMessageSent;
     int attempts = 0;
+
+    // send welcome message
+    int sent = SendWelcomeMessage(sock);
+    std::cout << "Sent message with code: " << sent << std::endl;
+    if (sent != 0) return;
 
     while (running){
       // send and then wait for response
