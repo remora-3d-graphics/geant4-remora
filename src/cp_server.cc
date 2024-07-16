@@ -21,7 +21,7 @@ namespace remora {
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    // sendDataThread = std::thread(&Server::SendMessages, this);
+    sendDataThread = std::thread(&Server::SendMessages, this);
     allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
     manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
   }
@@ -90,7 +90,10 @@ namespace remora {
     while (running){
       if (messagesToBeSent.size() == 0) continue;
 
-      if (nThreads == nClientsReceived) messagesToBeSent.pop();
+      if (nThreads == nClientsReceived) {
+        nClientsReceived = 0;
+        messagesToBeSent.pop();
+      }
     }
   }
   
@@ -124,6 +127,24 @@ namespace remora {
   void Server::SendMessages() {
 
     while (running) {
+
+      // for now just a debug print
+      std::cout 
+      << "DEBUG: "
+      << "N Threads: "
+      << nThreads
+      << " N Received: "
+      << nClientsReceived
+      << " front of queue: "
+      << messagesToBeSent.front()
+      << std::endl;
+
+      std::this_thread::sleep_for(std::chrono::seconds(3));
+
+
+      continue;
+
+
       // for new sockets
       if (newSockets.size() != 0) {
         int clientSocket = newSockets.front();
