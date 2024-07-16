@@ -92,6 +92,7 @@ namespace remora {
       if (bytesReceived <= 0){
         std::cout << "Client closed connection. Killing thread." << std::endl;
         AddToNThreads(-1);
+        close(sock);
         std::cout << "Thread killed." << std::endl;
         break;
       }
@@ -107,6 +108,7 @@ namespace remora {
         // kill thread
         std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
         AddToNThreads(-1);
+        close(sock);
         std::cout << "Thread killed" << std::endl;
         break;
       }
@@ -114,6 +116,7 @@ namespace remora {
         // client wants to leave
         std::cout << "Socket: " << sock << " disconnected." << std::endl;
         AddToNThreads(-1);
+        close(sock);
         std::cout << "Thread killed." << std::endl;
         break;
       }
