@@ -74,15 +74,16 @@ namespace remora {
         std::cout << "Sent message" << std::endl;
       }
 
-      char buff[10];
+      char buff[10] = {0};
       int bytesReceived = -1;
 
       while (bytesReceived <= 0) {
         bytesReceived = recv(sock, buff, sizeof(buff), 0);
       }
 
-      if (buff == "REMORA(0)"){
+      if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
+        std::cout << "Success!" << std::endl;
         lastMessageSent = messagesToBeSent.front();
         nClientsReceived++;
         attempts = 0;
@@ -95,6 +96,7 @@ namespace remora {
       } 
       else {
         // try again
+        std::cout << "ERROR: client said: " << buff << std::endl;
         attempts++;
       }
     }
