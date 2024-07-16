@@ -142,11 +142,14 @@ namespace remora {
 
     while (running){
       // send and then wait for response
-      if (messagesToBeSent.front() == lastMessageSent) continue;
+      if (ViewNMessages() == 0) continue;
+      if (ViewNextMessage() == lastMessageSent) continue;
 
-      std::cout << "SENDING " << messagesToBeSent.front() << " from thread " << sock << std::endl;
+      std::string msgToSend = ViewNextMessage();
+
+      std::cout << "SENDING " << msgToSend << " from thread " << sock << std::endl;
       
-      const char* msg = messagesToBeSent.front().c_str();
+      const char* msg = msgToSend.c_str();
       int len, bytes_sent;
 
       len = strlen(msg);
@@ -170,14 +173,15 @@ namespace remora {
       if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
         std::cout << "Success!" << std::endl;
-        lastMessageSent = messagesToBeSent.front();
-        nClientsReceived++;
+        lastMessageSent = msgToSend;
+        AddToNClientsReceived(1);
         attempts = 0;
       }
       else if (attempts > 3){
         // kill thread
         std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
-        nThreads--;
+        AddToNThreads(-1);
+        std::cout << "Thread killed" << std::endl;
         break;
       } 
       else {
