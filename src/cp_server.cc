@@ -58,7 +58,21 @@ namespace remora {
       // send and then wait for response
       if (messagesToBeSent.front() == lastMessageSent) continue;
 
-      send(sock, messagesToBeSent.front().data(), sizeof(messagesToBeSent.front().data()), 0);
+      std::cout << "SENDING " << messagesToBeSent.front() << " from thread " << sock << std::endl;
+      
+      const char* msg = messagesToBeSent.front().c_str();
+      int len, bytes_sent;
+
+      len = strlen(msg);
+      bytes_sent = send(sock, msg, len, 0);
+
+      if (bytes_sent != len) {
+        std::cout << "The whole message wasn't quite sent!" << std::endl;
+        // return 1;
+      }
+      else {
+        std::cout << "Sent message" << std::endl;
+      }
 
       char buff[10];
       int bytesReceived = -1;
@@ -99,8 +113,10 @@ namespace remora {
   
 
   void Server::QueueMessageToBeSent(std::string msg){
+    // mutex lock it
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+    
     // enforce the wrapper
-
     std::ostringstream oss;
     oss << "REMORA(" << msg << ")";
     std::string formattedString = oss.str();

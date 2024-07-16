@@ -11,6 +11,7 @@
 #include <sstream>
 #include <chrono>
 #include <queue>
+#include <mutex>
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -51,6 +52,7 @@ namespace remora {
     int nClientsReceived = 0;
     void ClientLoop(int sock);
     void ManageMessagesLoop();
+    std::mutex messageQueueMutex;
 
     int SendTracks(){ return 0; };
 
