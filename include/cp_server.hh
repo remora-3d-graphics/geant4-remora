@@ -58,6 +58,7 @@ namespace remora {
     void ClientLoop(int sock);
     void ManageMessagesLoop();
 
+    std::mutex newClientsMutex;
     std::mutex messageQueueMutex;
     std::mutex nThreadsMutex;
     std::mutex nClientsReceivedMutex;
@@ -73,7 +74,11 @@ namespace remora {
     void AddToNClientsReceived(int num);
     void SetNClientsReceived(int num);
 
-		std::list<int> newSockets;
+    int ViewNNewClients();
+    void PushNewClient(int sock);
+    int PopNewClient();
+
+		std::list<int> newSockets; // todo: QUEUE
 		std::list<int> sockets;
 
 		std::thread listenThread;

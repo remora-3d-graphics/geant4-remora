@@ -92,6 +92,31 @@ namespace remora {
     nClientsReceived = num;
   }
 
+  int Server::ViewNNewClients(){
+    std::lock_guard<std::mutex> lock(newClientsMutex);
+
+    return newSockets.size();
+  }
+
+  void Server::PushNewClient(int sock){
+    std::lock_guard<std::mutex> lock(newClientsMutex);
+
+    newSockets.push_back(sock);
+  }
+
+  int Server::PopNewClient(){
+    std::lock_guard<std::mutex> lock(newClientsMutex);
+
+    int newClient;
+    if (newSockets.empty()){
+      std::cout << "Can't pop newSockets, it's empty!" << std::endl;
+      return -1;
+    }
+
+    newClient = newSockets.front();
+    newSockets.pop_front();
+  }
+
 
 
   void Server::AllocateThreadsLoop(){
