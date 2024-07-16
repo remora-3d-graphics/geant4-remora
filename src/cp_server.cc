@@ -21,7 +21,7 @@ namespace remora {
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    sendDataThread = std::thread(&Server::SendMessages, this);
+    // sendDataThread = std::thread(&Server::SendMessages, this);
     allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
     manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
   }
@@ -29,7 +29,7 @@ namespace remora {
   Server::~Server() {
     Stop();
     listenThread.join();
-    sendDataThread.join();
+    // sendDataThread.join();
 
     delete remoraMessenger;
   }
@@ -66,6 +66,7 @@ namespace remora {
         // success!
         lastMessageSent = messagesToBeSent.front();
         nClientsReceived++;
+        attempts = 0;
       }
       else if (attempts > 3){
         // kill thread
@@ -81,7 +82,11 @@ namespace remora {
   }
 
   void Server::ManageMessagesLoop(){
-    
+    while (running){
+      if (messagesToBeSent.size() == 0) continue;
+
+      if (nThreads == nClientsReceived) messagesToBeSent.pop();
+    }
   }
   
 
