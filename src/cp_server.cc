@@ -21,7 +21,7 @@ namespace remora {
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    sendDataThread = std::thread(&Server::SendMessages, this);
+    // sendDataThread = std::thread(&Server::SendMessages, this);
     allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
     manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
   }
@@ -121,12 +121,13 @@ namespace remora {
 
   void Server::AllocateThreadsLoop(){
     while (running){
-      if (newSockets.size() == 0) continue;
+      if (ViewNNewClients() == 0) continue;
 
       // allocate thread for new sockets
-      std::thread(&Server::ClientLoop, this, newSockets.front()).detach();
-      newSockets.pop_front();
-      nThreads++;
+      int newClient = PopNewClient();
+      std::thread(&Server::ClientLoop, this, newClient).detach();
+
+      AddToNThreads(1);
     }
   }
 
