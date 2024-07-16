@@ -194,11 +194,12 @@ namespace remora {
 
   void Server::ManageMessagesLoop(){
     while (running){
-      if (messagesToBeSent.size() == 0) continue;
+      if (ViewNMessages() == 0) continue;
 
-      if (nThreads == nClientsReceived) {
-        nClientsReceived = 0;
-        messagesToBeSent.pop();
+      if (ViewNThreads() == ViewNClientsReceived()) {
+        // msg sent to all threads
+        SetNClientsReceived(0);
+        PopNextMessage();
       }
     }
   }
