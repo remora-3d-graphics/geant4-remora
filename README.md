@@ -27,60 +27,9 @@ docker run --rm -p 8080:8080 -it remora_g4
 - Server checks if error == 0 and if bytes_received is equal
 - Server tries again a few times and then disconnects the socket
 
-## How to get dimensions from a G4VSolid:
-Possible methods:
-```cpp
-virtual G4ThreeVector SurfaceNormal(const G4ThreeVector& p) const = 0;
-      // Returns the outwards pointing unit normal of the shape for the
-      // surface closest to the point at offset p.
-
-virtual G4GeometryType  GetEntityType() const = 0;
-      // Provide identification of the class of an object.
-      // (required for persistency and STEP interface)
-
-virtual G4ThreeVector GetPointOnSurface() const;
-      // Returns a random point located on the surface of the solid.
-      // Points returned are not necessarily uniformly distributed.
-
-virtual G4Polyhedron* CreatePolyhedron () const;
-      // Create a G4Polyhedron.  (It is the caller's responsibility
-      // to delete it).  A null pointer means "not created".
-```
-
-The G4Polyhedron class is interesting:
-```cpp
-class G4Polyhedron : public HepPolyhedron, public G4Visible
-
-```
-The following is from HepPolydedron
-```cpp
-  // Get next vertex index of the quadrilateral
-  G4bool GetNextVertexIndex(G4int & index, G4int & edgeFlag) const;
-
-  // Get vertex by index
-  G4Point3D GetVertex(G4int index) const;
-
-  // Get next vertex + edge visibility of the quadrilateral
-  G4bool GetNextVertex(G4Point3D & vertex, G4int & edgeFlag) const;
-
-  // Get next vertex + edge visibility + normal of the quadrilateral
-  G4bool GetNextVertex(G4Point3D & vertex, G4int & edgeFlag,
-                       G4Normal3D & normal) const;
-
-  // Get indices of the next edge with indices of the faces
-  G4bool GetNextEdgeIndices(G4int & i1, G4int & i2, G4int & edgeFlag,
-                            G4int & iface1, G4int & iface2) const;
-  G4bool GetNextEdgeIndeces(G4int & i1, G4int & i2, G4int & edgeFlag,
-                            G4int & iface1, G4int & iface2) const
-  {return GetNextEdgeIndices(i1,i2,edgeFlag,iface1,iface2);}  // Old spelling
-
-  // Get indices of the next edge
-  G4bool GetNextEdgeIndices(G4int & i1, G4int & i2, G4int & edgeFlag) const;
-  G4bool GetNextEdgeIndeces(G4int & i1, G4int & i2, G4int & edgeFlag) const
-  {return GetNextEdgeIndices(i1,i2,edgeFlag);}  // Old spelling.
-
-
-```
+## Need for mutexes:
+- int nThreads = 0;
+- int nClientsReceived = 0;
 
 # Issues:
 - [ ] Geant4 app can't quit, I think because of the server running. Maybe because the messenger is still there?
