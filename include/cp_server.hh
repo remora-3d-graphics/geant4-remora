@@ -85,6 +85,7 @@ namespace remora {
 		std::thread sendDataThread;
     std::thread allocatorThread;
     std::thread manageMessagesThread;
+    std::thread timeOutThread;
 
 		std::queue<std::string> messagesToBeSent;
 

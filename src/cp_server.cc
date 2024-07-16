@@ -41,6 +41,10 @@ namespace remora {
       if (ViewNNewClients() == 0) continue;
 
       // allocate thread for new sockets
+
+      // only allocate if there are no messages in queue
+      while (ViewNMessages() != 0){}
+
       int newClient = PopNewClient();
       std::thread(&Server::ClientLoop, this, newClient).detach();
 
@@ -83,8 +87,13 @@ namespace remora {
       char buff[10] = {0};
       int bytesReceived = -1;
 
-      while (bytesReceived <= 0) {
-        bytesReceived = recv(sock, buff, sizeof(buff), 0);
+      bytesReceived = recv(sock, buff, sizeof(buff), 0);
+
+      if (bytesReceived <= 0){
+        std::cout << "Client closed connection. Killing thread." << std::endl;
+        AddToNThreads(-1);
+        std::cout << "Thread killed." << std::endl;
+        break;
       }
 
       if (std::strcmp(buff, "REMORA(0)") == 0){
@@ -323,10 +332,13 @@ namespace remora {
 
     char response[1024] = { 0 };
 
-    int bytes_recieved = -1;
+    int bytesReceived = -1;
 
-    while (bytes_recieved <= 0) {
-      bytes_recieved = recv(clientSocket, response, sizeof(response), 0);
+    bytesReceived = recv(clientSocket, response, sizeof(response), 0);
+
+    if (bytesReceived <= 0){
+      std::cout << "Socket closed by client" << std::endl;
+      return 1;
     }
 
     std::cout << "From socket " << clientSocket << ": " << response << std::endl;
