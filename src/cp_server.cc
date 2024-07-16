@@ -21,7 +21,7 @@ namespace remora {
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    // sendDataThread = std::thread(&Server::SendMessages, this);
+    sendDataThread = std::thread(&Server::SendMessages, this);
     allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
     manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
   }
@@ -123,6 +123,7 @@ namespace remora {
       // clear out messages if there are no clients connected
       if (ViewNThreads() == 0){
         PopNextMessage();
+        continue;
       }
 
       if (ViewNThreads() == ViewNClientsReceived()) {
@@ -175,37 +176,17 @@ namespace remora {
       std::cout 
       << "DEBUG: "
       << "N Threads: "
-      << nThreads
+      << ViewNThreads()
       << " N Received: "
-      << nClientsReceived
+      << ViewNClientsReceived()
       << " front of queue: "
-      << messagesToBeSent.front()
+      << ViewNextMessage()
       << std::endl;
 
       std::this_thread::sleep_for(std::chrono::seconds(3));
 
 
       continue;
-
-
-      // for new sockets
-      if (newSockets.size() != 0) {
-        int clientSocket = newSockets.front();
-        int sent = SendWelcomeMessage(clientSocket);
-        std::cout << "Sent message with code: " << sent << std::endl;
-        newSockets.pop_front();
-        sockets.push_back(clientSocket);
-      }
-
-      // send detectors ONLY when run is initialized
-
-
-      if (messagesToBeSent.size() > 0) {
-        SendToAll(messagesToBeSent.front());
-        messagesToBeSent.pop();
-      }
-
-      // cp_close(clientSocket);
     }
   }
 
