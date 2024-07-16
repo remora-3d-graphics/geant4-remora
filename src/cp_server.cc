@@ -206,14 +206,13 @@ namespace remora {
   
 
   void Server::QueueMessageToBeSent(std::string msg){
-    // mutex lock it
-    std::lock_guard<std::mutex> lock(messageQueueMutex);
-    
     // enforce the wrapper
     std::ostringstream oss;
     oss << "REMORA(" << msg << ")";
     std::string formattedString = oss.str();
 
+    // mutex lock it
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
     messagesToBeSent.push(formattedString);
   }
 
