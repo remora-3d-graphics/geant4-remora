@@ -22,23 +22,145 @@ namespace remora {
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
     sendDataThread = std::thread(&Server::SendMessages, this);
+    allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
+    manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
   }
 
   Server::~Server() {
     Stop();
     listenThread.join();
-    sendDataThread.join();
+    allocatorThread.join();
+    manageMessagesThread.join();
+    // sendDataThread.join();
 
     delete remoraMessenger;
   }
 
+  void Server::AllocateThreadsLoop(){
+    while (running){
+      if (ViewNNewClients() == 0) continue;
+
+      // allocate thread for new sockets
+
+      // only allocate if there are no messages in queue
+      while (ViewNMessages() != 0){}
+
+      int newClient = PopNewClient();
+      std::thread(&Server::ClientLoop, this, newClient).detach();
+
+      nThreads++;
+    }
+  }
+
+  void Server::ClientLoop(int sock){
+    std::string lastMessageSent;
+    int attempts = 0;
+
+    // send welcome message
+    int sent = SendWelcomeMessage(sock);
+    std::cout << "Sent message with code: " << sent << std::endl;
+    if (sent != 0) return;
+
+    while (running){
+      // send and then wait for response
+      if (ViewNMessages() == 0) continue;
+      if (ViewNextMessage() == lastMessageSent) continue;
+
+      std::string msgToSend = ViewNextMessage();
+
+      std::cout << "SENDING " << msgToSend << " from thread " << sock << std::endl;
+      
+      const char* msg = msgToSend.c_str();
+      int len, bytes_sent;
+
+      len = strlen(msg);
+      bytes_sent = send(sock, msg, len, 0);
+
+      if (bytes_sent != len) {
+        std::cout << "The whole message wasn't quite sent!" << std::endl;
+        // return 1;
+      }
+      else {
+        std::cout << "Sent message" << std::endl;
+      }
+
+      char buff[10] = {0};
+      int bytesReceived = -1;
+
+      bytesReceived = recv(sock, buff, sizeof(buff), 0);
+
+      if (bytesReceived <= 0){
+        std::cout << "Client closed connection. Killing thread." << std::endl;
+        nThreads--;
+        cp_close(sock);
+        std::cout << "Thread killed." << std::endl;
+        break;
+      }
+
+      if (std::strcmp(buff, "REMORA(0)") == 0){
+        // success!
+        std::cout << "Success!" << std::endl;
+        lastMessageSent = msgToSend;
+        nClientsReceived++;
+        attempts = 0;
+      }
+      else if (attempts > 6){
+        // kill thread
+        std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
+        nThreads--;
+        cp_close(sock);
+        std::cout << "Thread killed" << std::endl;
+        break;
+      }
+      else if (std::strcmp(buff, "bye") == 0){
+        // client wants to leave
+        std::cout << "Socket: " << sock << " disconnected." << std::endl;
+        nThreads--;
+        cp_close(sock);
+        std::cout << "Thread killed." << std::endl;
+        break;
+      }
+      else {
+        // try again
+        std::cout << "ERROR: client said: " << buff << std::endl;
+        attempts++;
+      }
+    }
+  }
+
+  void Server::ManageMessagesLoop(){
+    while (running){
+      if (ViewNMessages() == 0) continue;
+
+      // clear out messages if there are no clients connected
+      if (nThreads == 0){
+        PopNextMessage();
+        continue;
+      }
+
+      if (nThreads == nClientsReceived) {
+        // msg sent to all threads
+        nClientsReceived = 0;
+        PopNextMessage();
+      }
+    }
+  }
+  
+
   void Server::QueueMessageToBeSent(std::string msg){
     // enforce the wrapper
-
     std::ostringstream oss;
     oss << "REMORA(" << msg << ")";
     std::string formattedString = oss.str();
 
+    // make sure there are some clients
+    if (nThreads == 0){
+      std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
+      return;
+    }
+
+    // mutex lock it
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
     messagesToBeSent.push(formattedString);
   }
 
@@ -61,24 +183,22 @@ namespace remora {
   void Server::SendMessages() {
 
     while (running) {
-      // for new sockets
-      if (newSockets.size() != 0) {
-        int clientSocket = newSockets.front();
-        int sent = SendWelcomeMessage(clientSocket);
-        std::cout << "Sent message with code: " << sent << std::endl;
-        newSockets.pop_front();
-        sockets.push_back(clientSocket);
-      }
 
-      // send detectors ONLY when run is initialized
+      // for now just a debug print
+      std::cout 
+      << "DEBUG: "
+      << "N Threads: "
+      << nThreads
+      << " N Received: "
+      << nClientsReceived
+      << " front of queue: "
+      << ViewNextMessage()
+      << std::endl;
+
+      std::this_thread::sleep_for(std::chrono::seconds(3));
 
 
-      if (messagesToBeSent.size() > 0) {
-        SendToAll(messagesToBeSent.front());
-        messagesToBeSent.pop();
-      }
-
-      // cp_close(clientSocket);
+      continue;
     }
   }
 
@@ -215,10 +335,13 @@ namespace remora {
 
     char response[1024] = { 0 };
 
-    int bytes_recieved = -1;
+    int bytesReceived = -1;
 
-    while (bytes_recieved <= 0) {
-      bytes_recieved = recv(clientSocket, response, sizeof(response), 0);
+    bytesReceived = recv(clientSocket, response, sizeof(response), 0);
+
+    if (bytesReceived <= 0){
+      std::cout << "Socket closed by client" << std::endl;
+      return 1;
     }
 
     std::cout << "From socket " << clientSocket << ": " << response << std::endl;
@@ -291,4 +414,60 @@ namespace remora {
 
     return 0;
   }
-}
+
+
+  // Mutex management
+  int Server::ViewNMessages(){
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+
+    return messagesToBeSent.size();
+  }
+
+  std::string Server::ViewNextMessage(){
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+
+    if (messagesToBeSent.empty()){
+      return "";
+    }
+
+    return messagesToBeSent.front();
+  }
+
+  void Server::PopNextMessage(){
+    std::lock_guard<std::mutex> lock(messageQueueMutex);
+
+    if (messagesToBeSent.empty()){
+      std::cout << "Cant pop, message queue empty!" << std::endl;
+      return;
+    }
+
+    messagesToBeSent.pop();
+  }
+
+  int Server::ViewNNewClients(){
+    std::lock_guard<std::mutex> lock(newClientsMutex);
+
+    return newSockets.size();
+  }
+
+  void Server::PushNewClient(int sock){
+    std::lock_guard<std::mutex> lock(newClientsMutex);
+
+    newSockets.push_back(sock);
+  }
+
+  int Server::PopNewClient(){
+    std::lock_guard<std::mutex> lock(newClientsMutex);
+
+    int newClient;
+    if (newSockets.empty()){
+      std::cout << "Can't pop newSockets, it's empty!" << std::endl;
+      return -1;
+    }
+
+    newClient = newSockets.front();
+    newSockets.pop_front();
+
+    return newClient;
+  }
+} // ! namespace remora
