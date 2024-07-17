@@ -39,6 +39,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] TODO: FIGURE OUT HOW TO SEND IN CHUNKS. maybe the wrapper that the server sends has "CMD{JSON}DONE" or something and the client will keep receiving until "DONE" is read. 
 - [ ] If client presses the 'x' the server doesn't register that it left.
 - [ ] Sometimes not all clients get all messages. For example one client got 2 shapes and not the third.
+- [ ] The shapes are missing one connecting line each
 
 # Useful websites
 - [Helpful tips about mutexes](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)
