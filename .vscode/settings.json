@@ -98,6 +98,7 @@
     "vec3": "cpp",
     "vec4": "cpp",
     "vector3": "cpp",
-    "event": "cpp"
+    "event": "cpp",
+    "shared_mutex": "cpp"
   }
 }

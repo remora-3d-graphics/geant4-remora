@@ -74,6 +74,16 @@ namespace remora {
     void PushNewClient(int sock);
     int PopNewClient();
 
+    std::unordered_map<int, int> clientsUnsent; // tells clients how many messages they haven't sent yet
+    std::shared_mutex clientsUnsentMutex;
+    std::mutex masterUnsentMutex;
+
+    void AddClientToUnsent(unsigned int clientSock);
+    void RemoveClientFromUnsent(unsigned int clientSock);
+    void AddMessageToUnsent(unsigned int num);
+    unsigned int ClientAccessNUnsent(unsigned int clientSock);
+    void ClientSubtractFromUnsent(unsigned int clientSock);
+
 		std::list<int> newSockets; // todo: QUEUE
 		std::list<int> sockets;
 

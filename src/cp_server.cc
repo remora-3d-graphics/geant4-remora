@@ -64,7 +64,7 @@ namespace remora {
     while (running){
       // send and then wait for response
       if (ViewNMessages() == 0) continue;
-      if (ViewNextMessage() == lastMessageSent) continue;
+      if (ViewNextMessage() == lastMessageSent) continue; // this is the problem!
 
       std::string msgToSend = ViewNextMessage();
 
