@@ -296,9 +296,6 @@ namespace remora {
 
     theJson += "\"indices\":[";
 
-    // get indices of edge connections
-    // ISSUE HERE" There are only 6 vertices and 
-    // the indices go up to 8. They may be 1 indexed..
     std::vector<std::pair<G4int, G4int>> edgeIndices;
     G4int flags = 0;
     G4int edgei[2];
