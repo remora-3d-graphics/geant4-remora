@@ -84,6 +84,8 @@ namespace remora {
     unsigned int ClientAccessNUnsent(unsigned int clientSock);
     void ClientSubtractFromUnsent(unsigned int clientSock);
 
+    void KillClientThread(int sock);
+
 		std::list<int> newSockets; // todo: QUEUE
 		std::list<int> sockets;
 

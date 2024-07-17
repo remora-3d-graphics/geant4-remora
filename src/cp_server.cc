@@ -46,6 +46,10 @@ namespace remora {
       while (ViewNMessages() != 0){}
 
       int newClient = PopNewClient();
+
+      // create an unsent entry for them
+      AddClientToUnsent(newClient);
+
       std::thread(&Server::ClientLoop, this, newClient).detach();
 
       nThreads++;
@@ -53,7 +57,6 @@ namespace remora {
   }
 
   void Server::ClientLoop(int sock){
-    std::string lastMessageSent;
     int attempts = 0;
 
     // send welcome message
@@ -64,7 +67,9 @@ namespace remora {
     while (running){
       // send and then wait for response
       if (ViewNMessages() == 0) continue;
-      if (ViewNextMessage() == lastMessageSent) continue; // this is the problem!
+
+      // if we have none to send, continue
+      if (ClientAccessNUnsent(sock) == 0) continue;
 
       std::string msgToSend = ViewNextMessage();
 
@@ -90,34 +95,25 @@ namespace remora {
       bytesReceived = recv(sock, buff, sizeof(buff), 0);
 
       if (bytesReceived <= 0){
-        std::cout << "Client closed connection. Killing thread." << std::endl;
-        nThreads--;
-        cp_close(sock);
-        std::cout << "Thread killed." << std::endl;
+        KillClientThread(sock);
         break;
       }
 
       if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
         std::cout << "Success!" << std::endl;
-        lastMessageSent = msgToSend;
+        ClientSubtractFromUnsent(sock);
         nClientsReceived++;
         attempts = 0;
       }
       else if (attempts > 6){
         // kill thread
-        std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
-        nThreads--;
-        cp_close(sock);
-        std::cout << "Thread killed" << std::endl;
+        KillClientThread(sock);
         break;
       }
       else if (std::strcmp(buff, "bye") == 0){
         // client wants to leave
-        std::cout << "Socket: " << sock << " disconnected." << std::endl;
-        nThreads--;
-        cp_close(sock);
-        std::cout << "Thread killed." << std::endl;
+        KillClientThread(sock);
         break;
       }
       else {
@@ -126,6 +122,13 @@ namespace remora {
         attempts++;
       }
     }
+  }
+
+  void Server::KillClientThread(int sock){
+    nThreads--;
+    cp_close(sock);
+    RemoveClientFromUnsent(sock);
+    std::cout << "Client " << sock << "disconnected." << std::endl;
   }
 
   void Server::ManageMessagesLoop(){
@@ -162,6 +165,9 @@ namespace remora {
     // mutex lock it
     std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
     messagesToBeSent.push(formattedString);
+
+    // add to unsent so the clients know there's one waiting
+    AddMessageToUnsent(1);
   }
 
   void Server::AcceptConnections() {
