@@ -160,7 +160,7 @@ namespace remora {
     }
 
     // mutex lock it
-    std::lock_guard<std::mutex> lock(messageQueueMutex);
+    std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
     messagesToBeSent.push(formattedString);
   }
 
@@ -436,13 +436,13 @@ namespace remora {
 
   // Mutex management
   int Server::ViewNMessages(){
-    std::lock_guard<std::mutex> lock(messageQueueMutex);
+    std::shared_lock<std::shared_mutex> lock(messageQueueReadMutex);
 
     return messagesToBeSent.size();
   }
 
   std::string Server::ViewNextMessage(){
-    std::lock_guard<std::mutex> lock(messageQueueMutex);
+    std::shared_lock<std::shared_mutex> lock(messageQueueReadMutex);
 
     if (messagesToBeSent.empty()){
       return "";
@@ -452,7 +452,7 @@ namespace remora {
   }
 
   void Server::PopNextMessage(){
-    std::lock_guard<std::mutex> lock(messageQueueMutex);
+    std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
 
     if (messagesToBeSent.empty()){
       std::cout << "Cant pop, message queue empty!" << std::endl;
@@ -463,19 +463,19 @@ namespace remora {
   }
 
   int Server::ViewNNewClients(){
-    std::lock_guard<std::mutex> lock(newClientsMutex);
+    std::shared_lock<std::shared_mutex> lock(newClientsReadMutex);
 
     return newSockets.size();
   }
 
   void Server::PushNewClient(int sock){
-    std::lock_guard<std::mutex> lock(newClientsMutex);
+    std::unique_lock<std::mutex> lock(newClientsWriteMutex);
 
     newSockets.push_back(sock);
   }
 
   int Server::PopNewClient(){
-    std::lock_guard<std::mutex> lock(newClientsMutex);
+    std::unique_lock<std::mutex> lock(newClientsWriteMutex);
 
     int newClient;
     if (newSockets.empty()){

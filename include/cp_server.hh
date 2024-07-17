@@ -13,6 +13,7 @@
 #include <queue>
 #include <mutex>
 #include <atomic>
+#include <shared_mutex>
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -59,8 +60,10 @@ namespace remora {
     void ClientLoop(int sock);
     void ManageMessagesLoop();
 
-    std::mutex newClientsMutex;
-    std::mutex messageQueueMutex;
+    std::mutex newClientsWriteMutex;
+    std::shared_mutex newClientsReadMutex;
+    std::mutex messageQueueWriteMutex;
+    std::shared_mutex messageQueueReadMutex;
 
     // functions that need a mutex
     int ViewNMessages();
@@ -78,7 +81,7 @@ namespace remora {
 		std::thread sendDataThread;
     std::thread allocatorThread;
     std::thread manageMessagesThread;
-    std::thread timeOutThread;
+    std::thread timeOutThread; // todo
 
 		std::queue<std::string> messagesToBeSent;
 
