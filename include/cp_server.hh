@@ -12,6 +12,7 @@
 #include <chrono>
 #include <queue>
 #include <mutex>
+#include <atomic>
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -53,26 +54,18 @@ namespace remora {
 
     // client thread stuff
     void AllocateThreadsLoop();
-    int nThreads = 0;
-    int nClientsReceived = 0;
+    std::atomic<int> nThreads = 0;
+    std::atomic<int> nClientsReceived = 0;
     void ClientLoop(int sock);
     void ManageMessagesLoop();
 
     std::mutex newClientsMutex;
     std::mutex messageQueueMutex;
-    std::mutex nThreadsMutex;
-    std::mutex nClientsReceivedMutex;
 
     // functions that need a mutex
     int ViewNMessages();
     std::string ViewNextMessage();
     void PopNextMessage();
-
-    int ViewNThreads();
-    int ViewNClientsReceived();
-    void AddToNThreads(int num);
-    void AddToNClientsReceived(int num);
-    void SetNClientsReceived(int num);
 
     int ViewNNewClients();
     void PushNewClient(int sock);
@@ -89,7 +82,7 @@ namespace remora {
 
 		std::queue<std::string> messagesToBeSent;
 
-		bool running = true;
+		std::atomic<bool> running = true;
     bool g4runInitialized = false;
 
 		RemoraMessenger* remoraMessenger;

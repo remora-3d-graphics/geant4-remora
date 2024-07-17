@@ -48,7 +48,7 @@ namespace remora {
       int newClient = PopNewClient();
       std::thread(&Server::ClientLoop, this, newClient).detach();
 
-      AddToNThreads(1);
+      nThreads++;
     }
   }
 
@@ -91,7 +91,7 @@ namespace remora {
 
       if (bytesReceived <= 0){
         std::cout << "Client closed connection. Killing thread." << std::endl;
-        AddToNThreads(-1);
+        nThreads--;
         cp_close(sock);
         std::cout << "Thread killed." << std::endl;
         break;
@@ -101,13 +101,13 @@ namespace remora {
         // success!
         std::cout << "Success!" << std::endl;
         lastMessageSent = msgToSend;
-        AddToNClientsReceived(1);
+        nClientsReceived++;
         attempts = 0;
       }
       else if (attempts > 6){
         // kill thread
         std::cout << "Socket: " << sock << " disconnected after " << attempts << " tries. " << std::endl;
-        AddToNThreads(-1);
+        nThreads--;
         cp_close(sock);
         std::cout << "Thread killed" << std::endl;
         break;
@@ -115,7 +115,7 @@ namespace remora {
       else if (std::strcmp(buff, "bye") == 0){
         // client wants to leave
         std::cout << "Socket: " << sock << " disconnected." << std::endl;
-        AddToNThreads(-1);
+        nThreads--;
         cp_close(sock);
         std::cout << "Thread killed." << std::endl;
         break;
@@ -133,14 +133,14 @@ namespace remora {
       if (ViewNMessages() == 0) continue;
 
       // clear out messages if there are no clients connected
-      if (ViewNThreads() == 0){
+      if (nThreads == 0){
         PopNextMessage();
         continue;
       }
 
-      if (ViewNThreads() == ViewNClientsReceived()) {
+      if (nThreads == nClientsReceived) {
         // msg sent to all threads
-        SetNClientsReceived(0);
+        nClientsReceived = 0;
         PopNextMessage();
       }
     }
@@ -154,7 +154,7 @@ namespace remora {
     std::string formattedString = oss.str();
 
     // make sure there are some clients
-    if (ViewNThreads() == 0){
+    if (nThreads == 0){
       std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
       return;
     }
@@ -188,9 +188,9 @@ namespace remora {
       std::cout 
       << "DEBUG: "
       << "N Threads: "
-      << ViewNThreads()
+      << nThreads
       << " N Received: "
-      << ViewNClientsReceived()
+      << nClientsReceived
       << " front of queue: "
       << ViewNextMessage()
       << std::endl;
@@ -442,36 +442,6 @@ namespace remora {
     }
 
     messagesToBeSent.pop();
-  }
-
-  int Server::ViewNThreads(){
-    std::lock_guard<std::mutex> lock(nThreadsMutex);
-  
-    return nThreads;
-  }
-
-  int Server::ViewNClientsReceived(){
-    std::lock_guard<std::mutex> lock(nClientsReceivedMutex);
-
-    return nClientsReceived;
-  }
-
-  void Server::AddToNThreads(int num){
-    std::lock_guard<std::mutex> lock(nThreadsMutex);
-
-    nThreads += num;
-  }
-
-  void Server::AddToNClientsReceived(int num){
-    std::lock_guard<std::mutex> lock(nClientsReceivedMutex);
-
-    nClientsReceived += num;
-  }
-
-  void Server::SetNClientsReceived(int num){
-    std::lock_guard<std::mutex> lock(nClientsReceivedMutex);
-
-    nClientsReceived = num;
   }
 
   int Server::ViewNNewClients(){
