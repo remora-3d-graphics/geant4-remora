@@ -61,11 +61,15 @@ namespace gps_test {
 		);
 
     // a few more boxes for fun
+
+    G4RotationMatrix* rot = new G4RotationMatrix();
+    rot->rotateX(20*deg);
+
     G4Box* solidBox2 = new G4Box("solidBox2", 10*cm, 10*cm, 10*cm);
     G4LogicalVolume* logicBox2 = new G4LogicalVolume(solidBox2, Ti, "logicBox2");
     new G4PVPlacement(
-      nullptr,
-      G4ThreeVector(5*cm, 5*cm, -5*cm),
+      rot,
+      G4ThreeVector(5*cm, 5*cm, 15*cm),
       logicBox2,
       "physBox2",
       logicWorld,
@@ -76,7 +80,7 @@ namespace gps_test {
     G4LogicalVolume* logicBox3 = new G4LogicalVolume(solidBox3, Ti, "logicBox3");
     new G4PVPlacement(
       nullptr,
-      G4ThreeVector(5*cm, 5*cm, -15*cm),
+      G4ThreeVector(-5*cm, 5*cm, 35*cm),
       logicBox3,
       "physBox3",
       logicWorld,

@@ -93,6 +93,11 @@
     "forward_list": "cpp",
     "ranges": "cpp",
     "valarray": "cpp",
-    "*.icc": "cpp"
+    "*.icc": "cpp",
+    "vec2": "cpp",
+    "vec3": "cpp",
+    "vec4": "cpp",
+    "vector3": "cpp",
+    "event": "cpp"
   }
 }
