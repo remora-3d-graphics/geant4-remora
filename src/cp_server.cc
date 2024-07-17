@@ -488,4 +488,40 @@ namespace remora {
 
     return newClient;
   }
+
+
+  void Server::AddClientToUnsent(unsigned int clientSock){
+    std::unique_lock<std::mutex> lock(masterUnsentMutex);
+    clientsUnsent[clientSock] = 0;
+  }
+
+  void Server::RemoveClientFromUnsent(unsigned int clientSock){
+    std::unique_lock<std::mutex> lock(masterUnsentMutex);
+    if (clientsUnsent.find(clientSock) != clientsUnsent.end()){
+      clientsUnsent.erase(clientSock);
+    }
+    else {
+      std::cout << "RemoveClientFromUnsent error, client not found in map" << std::endl;
+    }
+  }
+
+  void Server::AddMessageToUnsent(unsigned int num){
+    std::unique_lock<std::mutex> lock(masterUnsentMutex);
+    for (auto& entry : clientsUnsent){
+      entry.second += 1;
+    }
+  }
+
+  unsigned int Server::ClientAccessNUnsent(unsigned int clientSock){
+    std::shared_lock<std::shared_mutex> lock(clientsUnsentMutex);
+
+    return clientsUnsent[clientSock];
+  }
+
+  void Server::ClientSubtractFromUnsent(unsigned int clientSock){
+    std::shared_lock<std::shared_mutex> lock(clientsUnsentMutex);
+
+    clientsUnsent[clientSock] -= 1;
+  }
+
 } // ! namespace remora
