@@ -227,14 +227,7 @@ namespace remora {
 
       G4String name = volume->GetName();
 
-      // gotta add the x y and z position to all points
-      double x = volume->GetTranslation().getX();
-      double y = volume->GetTranslation().getY();
-      double z = volume->GetTranslation().getZ();
-
-      // gotta rotate all points
-
-      json shapeJson = GetJsonFromSolid(volume->GetLogicalVolume()->GetSolid());
+      json shapeJson = GetJsonFromVolume(volume);
       wrapper[name] = shapeJson;
 
       // debug print
@@ -246,14 +239,27 @@ namespace remora {
     return 0;
   }
 
-  json Server::GetJsonFromSolid(const G4VSolid* solid){
+  json Server::GetJsonFromVolume(const G4VPhysicalVolume* volume){
     json solidJson;
 
+    G4VSolid* solid = volume->GetLogicalVolume()->GetSolid();
+
     G4Polyhedron* polyhedron = solid->CreatePolyhedron();
+
+    // gotta add the x y and z position to all points
+    double x = volume->GetTranslation().getX();
+    double y = volume->GetTranslation().getY();
+    double z = volume->GetTranslation().getZ();
+
+    // gotta rotate all points
         
     // lambda function to convert double into int then string
     auto format = [](G4double d){
       return std::to_string(static_cast<int>(d));
+    };
+
+    auto moveAndRotate = [](G4double vertex){
+
     };
 
     // create JSON:
