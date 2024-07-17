@@ -24,6 +24,7 @@ namespace remora {
 		G4UIdirectory* fDirectory;
 		G4UIcmdWithAString* fChangeTitleCmd;
     G4UIcmdWithoutParameter* fSendDetectorsCmd;
+    G4UIcmdWithAString* fRmShapeWithNameCmd;
 	
 	};
 }

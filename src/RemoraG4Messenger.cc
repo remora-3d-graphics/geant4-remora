@@ -7,6 +7,9 @@ namespace remora {
 	
 		fChangeTitleCmd = new G4UIcmdWithAString("/remora/setTitle", this);
     fSendDetectorsCmd = new G4UIcmdWithoutParameter("/remora/sendDetectors", this);
+    fRmShapeWithNameCmd = new G4UIcmdWithAString("/remora/removeShapeWithName", this);
+    fRmShapeWithNameCmd->SetGuidance("Removes all shapes who's name start with the inputted string. Useful for removing all particle trajectories. e.g.: /remora/removeShapeWithName particle");
+
 
 	}
 
@@ -17,6 +20,10 @@ namespace remora {
 		}
     if (cmd == fSendDetectorsCmd){
       serverPtr->SendDetectors();
+    }
+    if (cmd == fRmShapeWithNameCmd){
+      G4String rmShapesCommand = "RmShape" + newValues;
+      serverPtr->QueueMessageToBeSent(rmShapesCommand);
     }
 	}
 }
