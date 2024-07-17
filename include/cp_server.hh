@@ -13,6 +13,7 @@
 #include <queue>
 #include <mutex>
 #include <atomic>
+#include <shared_mutex>
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -59,8 +60,10 @@ namespace remora {
     void ClientLoop(int sock);
     void ManageMessagesLoop();
 
-    std::mutex newClientsMutex;
-    std::mutex messageQueueMutex;
+    std::mutex newClientsWriteMutex;
+    std::shared_mutex newClientsReadMutex;
+    std::mutex messageQueueWriteMutex;
+    std::shared_mutex messageQueueReadMutex;
 
     // functions that need a mutex
     int ViewNMessages();
@@ -71,6 +74,18 @@ namespace remora {
     void PushNewClient(int sock);
     int PopNewClient();
 
+    std::unordered_map<int, int> clientsUnsent; // tells clients how many messages they haven't sent yet
+    std::shared_mutex clientsUnsentMutex;
+    std::mutex masterUnsentMutex;
+
+    void AddClientToUnsent(unsigned int clientSock);
+    void RemoveClientFromUnsent(unsigned int clientSock);
+    void AddMessageToUnsent(unsigned int num);
+    unsigned int ClientAccessNUnsent(unsigned int clientSock);
+    void ClientSubtractFromUnsent(unsigned int clientSock);
+
+    void KillClientThread(int sock);
+
 		std::list<int> newSockets; // todo: QUEUE
 		std::list<int> sockets;
 
@@ -78,7 +93,7 @@ namespace remora {
 		std::thread sendDataThread;
     std::thread allocatorThread;
     std::thread manageMessagesThread;
-    std::thread timeOutThread;
+    std::thread timeOutThread; // todo
 
 		std::queue<std::string> messagesToBeSent;
 
