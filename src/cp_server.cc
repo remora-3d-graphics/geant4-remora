@@ -226,7 +226,8 @@ namespace remora {
       json wrapper;
 
       G4String name = volume->GetName();
-      json shapeJson = GetJsonFromSolid(volume->GetLogicalVolume()->GetSolid());
+
+      json shapeJson = GetJsonFromVolume(volume);
       wrapper[name] = shapeJson;
 
       // debug print
@@ -238,14 +239,29 @@ namespace remora {
     return 0;
   }
 
-  json Server::GetJsonFromSolid(const G4VSolid* solid){
+  json Server::GetJsonFromVolume(const G4VPhysicalVolume* volume){
     json solidJson;
 
+    G4VSolid* solid = volume->GetLogicalVolume()->GetSolid();
+
     G4Polyhedron* polyhedron = solid->CreatePolyhedron();
-        
+
+    /*
+    FROM G4 DOCUMENTATION
+    GetObjectRotationValue() const;  //  Replacement
+    G4ThreeVector  GetObjectTranslation() const;
+    */
+    G4ThreeVector pos = volume->GetObjectTranslation();
+    G4RotationMatrix rot = volume->GetObjectRotationValue();
+
     // lambda function to convert double into int then string
     auto format = [](G4double d){
       return std::to_string(static_cast<int>(d));
+    };
+
+    auto rotateAndMove = [](G4ThreeVector vertex_, G4ThreeVector pos_, G4RotationMatrix rot_){
+      // rotate, then move.
+      return rot_(vertex_) + pos_;
     };
 
     // create JSON:
@@ -255,12 +271,14 @@ namespace remora {
     G4int numVertices = polyhedron->GetNoVertices();
     // note: vertices are one indexed
     for (G4int i=1; i < numVertices+1; i++) {
+      G4ThreeVector theVertex = rotateAndMove(polyhedron->GetVertex(i), pos, rot);
+
       theJson += "[";
-      theJson += format(polyhedron->GetVertex(i).x());
+      theJson += format(theVertex.x());
       theJson += ",";
-      theJson += format(polyhedron->GetVertex(i).y());
+      theJson += format(theVertex.y());
       theJson += ",";
-      theJson += format(polyhedron->GetVertex(i).z());
+      theJson += format(theVertex.z());
       if (i == numVertices){ 
         // the last one
         theJson += "]";

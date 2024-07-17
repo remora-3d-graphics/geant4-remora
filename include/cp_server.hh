@@ -48,7 +48,7 @@ namespace remora {
 
     int SendDetectors(int sock=-1);
     int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
-    json GetJsonFromSolid(const G4VSolid* solid);
+    json GetJsonFromVolume(const G4VPhysicalVolume* volume);
 
     int SendTracks(){ return 0; };
 
