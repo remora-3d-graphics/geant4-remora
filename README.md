@@ -14,8 +14,8 @@ docker run --rm -p 8080:8080 -it remora_g4
 
 
 # Todo:
-- [ ] Make a client recv thread and send thread. The issue is that the server waits to hear back from the client.
-- [ ] If a socket disconnects, make sure and remove it from the sockets list
+- [x] Make a client recv thread and send thread. The issue is that the server waits to hear back from the client.
+- [x] If a socket disconnects, make sure and remove it from the sockets list SOLUTION: Next message they try to send, if they don't get anything or they get 'bye' they kill the socket.
 - [ ] client side: if server disconnects, disconnect as well. 
 - [ ] Error handling for sending and receiving messages
 - [ ] Basically graceful disconnection needs to be addressed from server and client sides.
@@ -38,6 +38,9 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] If the shape json is too long (e.g. G4Sphere) the connection needs to be able to receive the whole thing. The client can't get the whole thing in time and it crashes. This means the server needs to send it in chunks.
 - [ ] TODO: FIGURE OUT HOW TO SEND IN CHUNKS. maybe the wrapper that the server sends has "CMD{JSON}DONE" or something and the client will keep receiving until "DONE" is read. 
 - [ ] If client presses the 'x' the server doesn't register that it left.
+
+## New approach to multiple clients messages
+- instead of doing all this mutex stuff, I will have each new client get it's own list (on the master thread). if the message queue gets a new message, it gets added to all the lists. Then once it is popped from all the lists, you can pop it from the messages.
 
 # Useful websites
 - [Helpful tips about mutexes](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)
