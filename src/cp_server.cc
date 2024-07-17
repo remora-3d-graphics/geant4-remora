@@ -226,6 +226,14 @@ namespace remora {
       json wrapper;
 
       G4String name = volume->GetName();
+
+      // gotta add the x y and z position to all points
+      double x = volume->GetTranslation().getX();
+      double y = volume->GetTranslation().getY();
+      double z = volume->GetTranslation().getZ();
+
+      // gotta rotate all points
+
       json shapeJson = GetJsonFromSolid(volume->GetLogicalVolume()->GetSolid());
       wrapper[name] = shapeJson;
 
