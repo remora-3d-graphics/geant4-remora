@@ -8,6 +8,7 @@
 #include "G4PVPlacement.hh"
 
 #include "G4Tubs.hh"
+#include "G4Sphere.hh"
 
 namespace gps_test {
 
@@ -72,6 +73,18 @@ namespace gps_test {
       G4ThreeVector(0, 0, 15*cm),
       logicTub,
       "physTub",
+      logicWorld,
+      false,
+      0
+    );
+
+    G4Sphere* solidSphere = new G4Sphere("solidSphere", 0, 30*cm, 0, 360*deg, 0, 360*deg);
+    G4LogicalVolume* logicSphere = new G4LogicalVolume(solidSphere, Ti, "logicSphere");
+    new G4PVPlacement(
+      nullptr,
+      G4ThreeVector(-10*cm, -10*cm, -10*cm),
+      logicSphere,
+      "physSphere",
       logicWorld,
       false,
       0
