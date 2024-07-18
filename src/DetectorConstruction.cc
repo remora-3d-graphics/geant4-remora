@@ -7,6 +7,8 @@
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 
+#include "G4Tubs.hh"
+
 namespace gps_test {
 
 	G4VPhysicalVolume* DetectorConstruction::Construct() {
@@ -60,29 +62,16 @@ namespace gps_test {
 			0
 		);
 
-    // a few more boxes for fun
+    // testing different shapes
+    G4Tubs* solidTub = new G4Tubs("solidTub", 3*cm, 5*cm, 10*cm, 0, 240*deg);
 
-    G4RotationMatrix* rot = new G4RotationMatrix();
-    rot->rotateX(20*deg);
+    G4LogicalVolume* logicTub = new G4LogicalVolume(solidTub, Ti, "logicTub");
 
-    G4Box* solidBox2 = new G4Box("solidBox2", 10*cm, 10*cm, 10*cm);
-    G4LogicalVolume* logicBox2 = new G4LogicalVolume(solidBox2, Ti, "logicBox2");
-    new G4PVPlacement(
-      rot,
-      G4ThreeVector(5*cm, 5*cm, 15*cm),
-      logicBox2,
-      "physBox2",
-      logicWorld,
-      false,
-      0
-    );
-    G4Box* solidBox3 = new G4Box("solidBox3", 5*cm, 10*cm, 13*cm);
-    G4LogicalVolume* logicBox3 = new G4LogicalVolume(solidBox3, Ti, "logicBox3");
     new G4PVPlacement(
       nullptr,
-      G4ThreeVector(-5*cm, 5*cm, 35*cm),
-      logicBox3,
-      "physBox3",
+      G4ThreeVector(0, 0, 15*cm),
+      logicTub,
+      "physTub",
       logicWorld,
       false,
       0
