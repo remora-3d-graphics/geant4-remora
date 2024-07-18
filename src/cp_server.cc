@@ -75,18 +75,25 @@ namespace remora {
 
       std::cout << "SENDING " << msgToSend << " from thread " << sock << std::endl;
       
+      // TODO::::: send in chunks!
+      int chunkSize = 1000;
+
       const char* msg = msgToSend.c_str();
-      int len, bytes_sent;
+      int len = strlen(msg);
+      int bytes_sent = 0;
+      int total_sent = 0;
 
-      len = strlen(msg);
-      bytes_sent = send(sock, msg, len, 0);
+      while (total_sent < len) {
+        int remaining = len - total_sent;
+        int to_send = remaining < chunkSize ? remaining : chunkSize;
 
-      if (bytes_sent != len) {
-        std::cout << "The whole message wasn't quite sent!" << std::endl;
-        // return 1;
-      }
-      else {
-        std::cout << "Sent message" << std::endl;
+        bytes_sent = send(sock, msg + total_sent, to_send, 0);
+        if (bytes_sent == -1) {
+          // Handle error
+          std::cerr << "Error sending message" << std::endl;
+          break;
+        }
+        total_sent += bytes_sent;
       }
 
       char buff[10] = {0};
