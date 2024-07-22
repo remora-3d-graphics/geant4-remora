@@ -4,6 +4,8 @@
 #include "cross_platform_sockets.hh"
 #include "json.hpp"
 
+#include "RemoraTrackingAction.hh"
+
 #include <iostream>
 #include <list>
 #include <thread>
@@ -36,6 +38,8 @@ namespace remora {
 		void QueueMessageToBeSent(std::string msg);
 
 	private:
+    int G4Init();
+
 		int Init();
 		void AcceptConnections();
 		void SendMessages();

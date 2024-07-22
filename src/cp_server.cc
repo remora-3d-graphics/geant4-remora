@@ -8,6 +8,11 @@ namespace remora {
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
 
+    if (G4Init() != 0){
+      std::cout
+      << "Geant4 parts didn't init properly." << std::endl;
+    }
+
     // currently the Init() function blocks Geant4 execution. TODO: put it on a thread
     if (Init() != 0) {
       std::cout
@@ -373,6 +378,17 @@ namespace remora {
     }
 
     std::cout << "From socket " << clientSocket << ": " << response << std::endl;
+
+    return 0;
+  }
+
+  int Server::G4Init(){
+    // note: this crashes because I have to set my initializations in ActionInitialization...
+    G4RunManagerFactory::GetMTMasterRunManager()->SetUserAction(new RemoraTrackingAction());
+
+    // one option is to get the user action init and then define a derived class and then
+    // set the action initialization back
+    // then this function really should block execution.
 
     return 0;
   }
