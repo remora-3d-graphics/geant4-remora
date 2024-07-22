@@ -40,6 +40,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] If client presses the 'x' the server doesn't register that it left.
 - [ ] Sometimes not all clients get all messages. For example one client got 2 shapes and not the third.
 - [ ] The shapes are missing one connecting line each
+- [ ] Seg fault at the end of one run. Look into how I'm modifying actionInitialization.
 
 # Useful websites
 - [Helpful tips about mutexes](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)
