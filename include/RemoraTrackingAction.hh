@@ -8,7 +8,6 @@
 class RemoraTrackingAction : public G4UserTrackingAction {
 public:
   RemoraTrackingAction();
-  ~RemoraTrackingAction();
 
   void PostUserTrackingAction(const G4Track*) override;
 };

@@ -383,12 +383,12 @@ namespace remora {
   }
 
   int Server::G4Init(){
-    // note: this crashes because I have to set my initializations in ActionInitialization...
-    G4RunManagerFactory::GetMTMasterRunManager()->SetUserAction(new RemoraTrackingAction());
-
     // one option is to get the user action init and then define a derived class and then
     // set the action initialization back
     // then this function really should block execution.
+    G4VUserActionInitialization *actionInit = G4RunManagerFactory::GetMasterRunManager()->GetNonConstUserActionInitialization();
+
+    G4RunManagerFactory::GetMasterRunManager()->SetUserInitialization(new RemoraActionInit(actionInit));
 
     return 0;
   }
