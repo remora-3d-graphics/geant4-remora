@@ -1,5 +1,7 @@
 # Geant4 Remora example
 
+BRANCH: NON-INVASIVE
+
 This is a simple Geant4 app that shows what the remora 3d graphics engine is capable of.
 
 For now, only supports one client at a time.
