@@ -43,7 +43,7 @@ docker run --rm -p 8080:8080 -it remora_g4
 
 # Stepping action branch:
 - [x] 1. Make a remoraSteppingAction
-- [ ] 2. In the server have a `buildingTraj` map and a `builtTraj` queue
+- [x] 2. In the server have a `buildingTraj` map and a `builtTraj` queue
 - [ ] 3. In the steppingAction, add new points to the buildingTraj map.
 - [ ] 4. In steppingAction, if that step point was the last point, aka the track status is killed, move that from the map to the queue. 
 - [ ] 5. In steppingAction, if the queue is full then stop and wait to not store so much data
