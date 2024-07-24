@@ -41,6 +41,25 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] Sometimes not all clients get all messages. For example one client got 2 shapes and not the third.
 - [ ] The shapes are missing one connecting line each
 
+# Stepping action branch:
+1. Make a remoraSteppingAction
+2. In the server have a `buildingTraj` map and a `builtTraj` queue
+3. In the steppingAction, add new points to the buildingTraj map.
+4. In steppingAction, if that step point was the last point, aka the track status is killed, move that from the map to the queue. 
+5. In steppingAction, if the queue is full then stop and wait to not store so much data
+6. have a thread take care of turning those points into json and sending them over.
+
+## BuildingTraj datastructure (G4VTrajectory?)
+- Datastructure that is a map of trajectory objects.
+- it can be an `std::map<Trajectory>`
+
+**Trajectory:**
+- this is a datastructure with:
+- particle name
+- trajectory points (queue)
+- that's it for now
+
+
 # Useful websites
 - [Helpful tips about mutexes](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)
 
