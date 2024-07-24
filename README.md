@@ -44,6 +44,8 @@ docker run --rm -p 8080:8080 -it remora_g4
 - [ ] The shapes are missing one connecting line each
 - [ ] Seg fault at the end of one run. Look into how I'm modifying actionInitialization.
 
+- TODO: To keep this non-invasive, pass in the RunManager, and on initialization, re-set the user action initialization to the remora one. As long as we have passed in the runManager and do it from there, it (SHOULD) work! The ONLY problem is memory management. It will allocate memory that will never be used... That's why I feel like maybe it's better to not reset the action initialization
+
 # Useful websites
 - [Helpful tips about mutexes](https://stackoverflow.com/questions/4989451/mutex-example-tutorial)
 
