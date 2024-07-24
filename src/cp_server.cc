@@ -388,7 +388,10 @@ namespace remora {
     // then this function really should block execution.
     G4VUserActionInitialization *actionInit = G4RunManagerFactory::GetMasterRunManager()->GetNonConstUserActionInitialization();
 
-    G4RunManagerFactory::GetMasterRunManager()->SetUserInitialization(new RemoraActionInit(actionInit));
+    // G4RunManagerFactory::GetMasterRunManager()->SetUserInitialization(new RemoraActionInit(actionInit));
+    // G4RunManager::GetRunManager()->SetUserInitialization(new RemoraActionInit(actionInit));
+
+    G4RunManagerFactory::GetMTMasterRunManager()->SetUserInitialization(new RemoraActionInit(actionInit));
 
     return 0;
   }
