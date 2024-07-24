@@ -7,14 +7,14 @@
 #include <map>
 #include <queue>
 
-namespace remora {
+#include "RemoraTrajectory.hh"
 
-typedef std::map<int, Trajectory> unfinishedTrajsContainer;
-typedef std::queue<int> trajIDContainer;
+namespace remora {
 
 class RemoraSteppingAction : public G4UserSteppingAction {
 public:
   RemoraSteppingAction(
+    TrajectoryManager* pTrajManager,
     G4UserSteppingAction* prevAction=nullptr
   );
   ~RemoraSteppingAction();
@@ -24,6 +24,9 @@ public:
 
 private:
   G4UserSteppingAction* pPrevAction = nullptr;
+
+  TrajectoryManager* pTrajManager;
+  
 };
 
 } // !namespace remora

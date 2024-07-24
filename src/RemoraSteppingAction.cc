@@ -3,8 +3,11 @@
 namespace remora
 {
 
-RemoraSteppingAction::RemoraSteppingAction(G4UserSteppingAction* prevAction)
-: pPrevAction(prevAction) {}
+RemoraSteppingAction::RemoraSteppingAction(
+  TrajectoryManager* trajManager,
+  G4UserSteppingAction* prevAction)
+: pTrajManager(trajManager),
+  pPrevAction(prevAction) {}
 
 RemoraSteppingAction::~RemoraSteppingAction(){
   if (pPrevAction) delete pPrevAction;

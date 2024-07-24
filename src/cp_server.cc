@@ -37,7 +37,7 @@ namespace remora {
   }
 
   RemoraSteppingAction* Server::GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction){
-    return new RemoraSteppingAction(prevSteppingAction);
+    return new RemoraSteppingAction(&trajManager, prevSteppingAction);
   }
 
   void Server::AllocateThreadsLoop(){
