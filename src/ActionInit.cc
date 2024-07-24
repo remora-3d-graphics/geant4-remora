@@ -1,5 +1,4 @@
 #include "ActionInit.hh"
-#include "RemoraSteppingAction.hh"
 
 namespace gps_test {
 

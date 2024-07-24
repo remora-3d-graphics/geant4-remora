@@ -22,12 +22,15 @@
 #include "G4VSolid.hh"
 #include "G4Polyhedron.hh"
 
+// remora includes
+#include "RemoraSteppingAction.hh"
+
+
 using json = nlohmann::json;
 
 namespace remora {
 
   class RemoraMessenger;
-  class RemoraSteppingAction;
 
 	class Server {
 	public:
