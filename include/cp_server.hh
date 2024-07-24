@@ -61,6 +61,7 @@ namespace remora {
 
     // send trajectory stuff
     std::map<int, Trajectory> trajsBeingBuilt;
+    std::queue<int> trajsToMoveOver;
     std::queue<Trajectory> finishedTrajs;
 
     // client thread stuff

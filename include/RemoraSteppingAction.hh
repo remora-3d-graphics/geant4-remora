@@ -4,12 +4,19 @@
 #include "G4UserSteppingAction.hh"
 #include "G4Step.hh"
 #include <iostream>
+#include <map>
+#include <queue>
 
 namespace remora {
 
+typedef std::map<int, Trajectory> unfinishedTrajsContainer;
+typedef std::queue<int> trajIDContainer;
+
 class RemoraSteppingAction : public G4UserSteppingAction {
 public:
-  RemoraSteppingAction(G4UserSteppingAction* prevAction=nullptr);
+  RemoraSteppingAction(
+    G4UserSteppingAction* prevAction=nullptr
+  );
   ~RemoraSteppingAction();
 
   void SetSteppingManagerPointer(G4SteppingManager* pValue) override;
