@@ -2,6 +2,8 @@
 #define REMORA_STEPPING_ACTION_HH 1
 
 #include "G4UserSteppingAction.hh"
+#include "G4Step.hh"
+#include <iostream>
 
 namespace remora {
 

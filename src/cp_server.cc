@@ -1,5 +1,6 @@
 #include "cp_server.hh"
 #include "RemoraG4Messenger.hh"
+#include "RemoraSteppingAction.hh"
 
 namespace remora {
   Server::Server() {
@@ -34,6 +35,10 @@ namespace remora {
     // sendDataThread.join();
 
     delete remoraMessenger;
+  }
+
+  RemoraSteppingAction* Server::GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction){
+    return new remora::RemoraSteppingAction(prevSteppingAction);
   }
 
   void Server::AllocateThreadsLoop(){

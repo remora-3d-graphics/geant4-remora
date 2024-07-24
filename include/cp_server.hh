@@ -27,6 +27,7 @@ using json = nlohmann::json;
 namespace remora {
 
   class RemoraMessenger;
+  class RemoraSteppingAction;
 
 	class Server {
 	public:
@@ -34,6 +35,8 @@ namespace remora {
 		~Server();
 
 		void QueueMessageToBeSent(std::string msg);
+
+    RemoraSteppingAction* GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction=nullptr);
 
 	private:
 		int Init();

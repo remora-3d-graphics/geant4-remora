@@ -16,6 +16,8 @@ void RemoraSteppingAction::SetSteppingManagerPointer(G4SteppingManager* pValue){
 
 void RemoraSteppingAction::UserSteppingAction(const G4Step* aStep){
   if (pPrevAction) pPrevAction->UserSteppingAction(aStep);
+
+  std::cout << "Stepping: " << aStep->GetTrack()->GetTrackID() << std::endl;
 }
 
 
