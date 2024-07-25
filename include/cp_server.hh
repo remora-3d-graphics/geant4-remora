@@ -62,8 +62,8 @@ namespace remora {
     // send trajectory stuff
     TrajectoryManager trajManager;
     void SendTrajsLoop();
-    bool SendOneTraj(Trajectory traj){return true;}
-    json GetTrajJson(Trajectory traj){return ""_json;}
+    bool SendOneTraj(Trajectory* traj);
+    json GetTrajJson(Trajectory* traj);
 
     // client thread stuff
     void AllocateThreadsLoop();

@@ -68,6 +68,16 @@ namespace remora {
     }
   }
 
+  bool Server::SendOneTraj(Trajectory* traj){
+
+    return true;
+  }
+
+  json Server::GetTrajJson(Trajectory* traj){
+    
+    return ""_json;
+  }
+
   void Server::AllocateThreadsLoop(){
     while (running){
       if (ViewNNewClients() == 0) continue;
