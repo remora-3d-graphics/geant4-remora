@@ -11,15 +11,16 @@ class MessageManager {
 public:
   MessageManager();
 
-  void AddNewClient(int clientID);
-  void RemoveClient(int clientID);
+  bool AddNewClient(int clientID);
+  bool RemoveClient(int clientID);
   bool ClientExists(int clientID);
 
-  bool QueueMessage(int clientID);
-  bool QueueMessageForAll();
+  bool QueueMessage(int clientID, std::string msg);
+  bool QueueMessageForAll(std::string msg);
 
   std::string GetNextMessage(int clientID);
-  void MessageSent(int clientID);
+  bool PopNextMessage(int clientID);
+  bool MessagesWaiting(int clientID);
 
 private:
   std::unordered_map<int, std::queue<std::string>> clientMap;
