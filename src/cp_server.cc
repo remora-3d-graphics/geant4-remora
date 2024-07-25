@@ -49,7 +49,7 @@ namespace remora {
       
       SendOneTraj(nextTraj);
 
-      trajManager.PopNextTrajectory(); // SEG FAULT..?
+      trajManager.PopNextTrajectory();
     }
   }
 
@@ -61,8 +61,8 @@ namespace remora {
       return false;
     }
 
-    std::cout << "Sending... ";
-    std::cout << theTrajJson << std::endl;
+    std::string msg = "AddShapes" + theTrajJson.dump();
+    QueueMessageToBeSent(msg);
     return true;
   }
 
