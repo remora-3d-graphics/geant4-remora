@@ -4,6 +4,9 @@
 #include <string>
 #include <queue>
 #include <unordered_map>
+#include <atomic>
+#include <mutex>
+
 #include "G4ThreeVector.hh"
 
 namespace remora {
@@ -16,9 +19,11 @@ public:
   int id;
   std::string name;
   std::queue<G4ThreeVector> points;
+  std::mutex ptsMutex;
 };
 
 class TrajectoryManager {
+  // TODO: ADD MUTEXES
 public:
   TrajectoryManager();
   bool Exists(int key);
@@ -34,8 +39,12 @@ private:
 
   std::unordered_map<int, Trajectory*> trajsInProgress;
   std::queue<Trajectory*> finishedTrajs;
+
+  std::mutex trajInProgressMutex;
+  std::mutex finishedTrajsMutex;
+
   int maxTrajs = 50;
-  bool locked = false;
+  std::atomic<bool> locked = false;
 
   friend class Server;
 };

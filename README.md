@@ -35,11 +35,12 @@ docker run --rm -p 8080:8080 -it remora_g4
 # Issues:
 - [ ] Geant4 app can't quit, I think because of the server running. Maybe because the messenger is still there?
 - [x] Even using the public version of the runManager, we can't get the world object. Fixed using RunManagerFactory
-- [ ] If the shape json is too long (e.g. G4Sphere) the connection needs to be able to receive the whole thing. The client can't get the whole thing in time and it crashes. This means the server needs to send it in chunks.
+- [x] If the shape json is too long (e.g. G4Sphere) the connection needs to be able to receive the whole thing. The client can't get the whole thing in time and it crashes. This means the server needs to send it in chunks.
 - [ ] TODO: FIGURE OUT HOW TO SEND IN CHUNKS. maybe the wrapper that the server sends has "CMD{JSON}DONE" or something and the client will keep receiving until "DONE" is read. 
 - [ ] If client presses the 'x' the server doesn't register that it left.
 - [ ] Sometimes not all clients get all messages. For example one client got 2 shapes and not the third.
 - [ ] The shapes are missing one connecting line each
+- [ ] Debug the messageQueue. perhaps a messageManager class. Sometimes a message gets stuck on the queue and it can't ever be sent.
 
 # Stepping action branch:
 - [x] 1. Make a remoraSteppingAction

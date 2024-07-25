@@ -5,13 +5,14 @@ namespace remora {
 
 // Trajectory
 
-static int trajectoryId = 0;
+static std::atomic<int> trajectoryId = 0;
 
 Trajectory::Trajectory(std::string name_) : name(name_) {
   id = ++trajectoryId;
 }
 
 void Trajectory::AddPoint(G4ThreeVector pt) {
+  std::lock_guard<std::mutex> lock(ptsMutex);
   points.push(pt);
 }
 
@@ -21,23 +22,32 @@ void Trajectory::AddPoint(G4ThreeVector pt) {
 TrajectoryManager::TrajectoryManager() {}
 
 bool TrajectoryManager::Exists(int key) {
+  std::lock_guard<std::mutex> lock(trajInProgressMutex);
+
   return trajsInProgress.count(key);
 }
 
 bool TrajectoryManager::AddTraj(int key, std::string name) {
-  if (Exists(key)) return false;
+  std::lock_guard<std::mutex> lock(trajInProgressMutex);
+
+  if (trajsInProgress.count(key)) return false;
   trajsInProgress[key] = new Trajectory(name);
   return true;
 }
 
 bool TrajectoryManager::AddPoint(int key, G4ThreeVector pt) {
-  if (!Exists(key)) return false;
+  std::lock_guard<std::mutex> lock(trajInProgressMutex);
+
+  if (!trajsInProgress.count(key)) return false;
   trajsInProgress[key]->AddPoint(pt);
   return true;
 }
 
 bool TrajectoryManager::FinishTraj(int key) {
-  if (!Exists(key)) return false;
+  std::lock_guard<std::mutex> lock1(trajInProgressMutex);
+  std::lock_guard<std::mutex> lock2(finishedTrajsMutex);
+
+  if (!trajsInProgress.count(key)) return false;
 
   finishedTrajs.push(trajsInProgress[key]);
 
@@ -54,14 +64,20 @@ bool TrajectoryManager::IsLocked() {
 }
 
 int TrajectoryManager::GetNTrajectories() {
+  std::lock_guard<std::mutex> lock(finishedTrajsMutex);
+
   return finishedTrajs.size();
 }
 
 Trajectory* TrajectoryManager::GetNextTrajectory() {
+  std::lock_guard<std::mutex> lock(finishedTrajsMutex);
+
   return finishedTrajs.front();
 }
 
 bool TrajectoryManager::PopNextTrajectory() {
+  std::lock_guard<std::mutex> lock(finishedTrajsMutex);
+
   if (finishedTrajs.empty()) return false;
 
   delete finishedTrajs.front();
