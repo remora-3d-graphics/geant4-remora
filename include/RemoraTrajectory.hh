@@ -58,13 +58,42 @@ public:
     finishedTrajs.push(trajsInProgress[key]);
     trajsInProgress.erase(key);
 
+    if (finishedTrajs.size() > maxTrajs){
+      locked = true;
+    }
+
     return true;
   }
-  
+
+  bool IsLocked(){
+    return locked;
+  }
 
 private:
+
+  int GetNTrajectories(){
+    return finishedTrajs.size();
+  }
+
+  Trajectory GetNextTrajectory(){
+    return finishedTrajs.front();
+  }
+
+  bool PopNextTrajectory(){
+    if (finishedTrajs.empty()) return false;
+
+    finishedTrajs.pop();
+    if (finishedTrajs.size() < maxTrajs) locked = false;
+    return true;
+  }
+
   std::unordered_map<int, Trajectory> trajsInProgress;
   std::queue<Trajectory> finishedTrajs;
+
+  int maxTrajs = 50;
+  bool locked = false;
+
+  friend class Server;
 };
 
 } // !remora
