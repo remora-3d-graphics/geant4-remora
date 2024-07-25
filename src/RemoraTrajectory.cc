@@ -22,13 +22,15 @@ void Trajectory::AddPoint(G4ThreeVector pt) {
 TrajectoryManager::TrajectoryManager() {}
 
 bool TrajectoryManager::Exists(int key) {
+  std::lock_guard<std::mutex> lock(trajInProgressMutex);
+
   return trajsInProgress.count(key);
 }
 
 bool TrajectoryManager::AddTraj(int key, std::string name) {
   std::lock_guard<std::mutex> lock(trajInProgressMutex);
 
-  if (Exists(key)) return false;
+  if (trajsInProgress.count(key)) return false;
   trajsInProgress[key] = new Trajectory(name);
   return true;
 }
@@ -36,7 +38,7 @@ bool TrajectoryManager::AddTraj(int key, std::string name) {
 bool TrajectoryManager::AddPoint(int key, G4ThreeVector pt) {
   std::lock_guard<std::mutex> lock(trajInProgressMutex);
 
-  if (!Exists(key)) return false;
+  if (!trajsInProgress.count(key)) return false;
   trajsInProgress[key]->AddPoint(pt);
   return true;
 }
@@ -45,7 +47,7 @@ bool TrajectoryManager::FinishTraj(int key) {
   std::lock_guard<std::mutex> lock1(trajInProgressMutex);
   std::lock_guard<std::mutex> lock2(finishedTrajsMutex);
 
-  if (!Exists(key)) return false;
+  if (!trajsInProgress.count(key)) return false;
 
   finishedTrajs.push(trajsInProgress[key]);
 
