@@ -64,7 +64,7 @@ namespace remora {
       }
       std::cout << std::endl;
 
-      trajManager.PopNextTrajectory();
+      trajManager.PopNextTrajectory(); // SEG FAULT..?
     }
   }
 
