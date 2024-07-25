@@ -61,6 +61,9 @@ namespace remora {
 
     // send trajectory stuff
     TrajectoryManager trajManager;
+    void SendTrajsLoop();
+    bool SendOneTraj(Trajectory traj){};
+    json GetTrajJson(Trajectory traj){};
 
     // client thread stuff
     void AllocateThreadsLoop();
@@ -103,6 +106,7 @@ namespace remora {
     std::thread allocatorThread;
     std::thread manageMessagesThread;
     std::thread timeOutThread; // todo... seriously though
+    std::thread sendTrajsThread;
 
 		std::queue<std::string> messagesToBeSent;
 
