@@ -38,6 +38,7 @@ public:
   }
 
   bool AddTraj(int key, std::string name){
+    // note: this key should be the Geant4 G4Track.TrackID();
     if (Exists(key)) return false;
 
     trajsInProgress[key] = Trajectory(name);
