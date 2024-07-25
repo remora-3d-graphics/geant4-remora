@@ -29,11 +29,11 @@ public:
 
 private:
   int GetNTrajectories();
-  Trajectory GetNextTrajectory();
+  Trajectory* GetNextTrajectory();
   bool PopNextTrajectory();
 
-  std::unordered_map<int, Trajectory> trajsInProgress;
-  std::queue<Trajectory> finishedTrajs;
+  std::unordered_map<int, Trajectory*> trajsInProgress;
+  std::queue<Trajectory*> finishedTrajs;
   int maxTrajs = 50;
   bool locked = false;
 

@@ -45,14 +45,14 @@ namespace remora {
     while (running){
       if (trajManager.GetNTrajectories() == 0) continue;
 
-      Trajectory nextTraj = trajManager.GetNextTrajectory();
+      Trajectory* nextTraj = trajManager.GetNextTrajectory();
 
       std::cout 
       << "Next traj points: ";
       
-      while (!nextTraj.points.empty()){
-        G4ThreeVector nextPt = nextTraj.points.front();
-        nextTraj.points.pop();
+      while (!nextTraj->points.empty()){
+        G4ThreeVector nextPt = nextTraj->points.front();
+        nextTraj->points.pop();
         std::cout
         << "("
         << nextPt.getX()
