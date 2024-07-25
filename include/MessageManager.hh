@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
+#include <mutex>
 
 namespace remora {
   
@@ -24,6 +25,8 @@ public:
 
 private:
   std::unordered_map<int, std::queue<std::string>> clientMap;
+
+  std::mutex clientMapMutex;
 
 };
 

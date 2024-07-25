@@ -5,6 +5,8 @@ namespace remora {
   }
 
   bool MessageManager::AddNewClient(int clientID){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     if (clientMap.count(clientID)) return false; 
 
     clientMap[clientID] = std::queue<std::string>();
@@ -12,6 +14,8 @@ namespace remora {
   }
 
   bool MessageManager::RemoveClient(int clientID){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     if (!clientMap.count(clientID)) return false;
 
     clientMap.erase(clientID);
@@ -19,10 +23,14 @@ namespace remora {
   }
 
   bool MessageManager::ClientExists(int clientID){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     return clientMap.count(clientID);
   }
 
   bool MessageManager::QueueMessage(int clientID, std::string msg){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     if (!clientMap.count(clientID)) return false;
 
     clientMap[clientID].push(msg);
@@ -30,6 +38,8 @@ namespace remora {
   }
 
   bool MessageManager::QueueMessageForAll(std::string msg){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     if (clientMap.empty()) return false;
 
     for (auto& pair : clientMap) {
@@ -39,6 +49,8 @@ namespace remora {
   }
 
   std::string MessageManager::GetNextMessage(int clientID){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     if (!clientMap.count(clientID)) return "";
     if (clientMap[clientID].empty()) return "";
 
@@ -46,6 +58,8 @@ namespace remora {
   }
 
   bool MessageManager::PopNextMessage(int clientID){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+
     if (!clientMap.count(clientID)) return false;
     if (clientMap[clientID].empty()) return false;
 
@@ -54,6 +68,8 @@ namespace remora {
   }
 
   bool MessageManager::MessagesWaiting(int clientID){
+    std::lock_guard<std::mutex> lock(clientMapMutex);
+    
     if (!clientMap.count(clientID)) return false;
 
     return !clientMap[clientID].empty();
