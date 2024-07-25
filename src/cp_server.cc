@@ -21,9 +21,9 @@ namespace remora {
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    sendDataThread = std::thread(&Server::SendMessages, this);
-    allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
-    manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
+    // sendDataThread = std::thread(&Server::SendMessages, this); // just debug
+    // allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
+    // manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this); // moved to MessageManager
     sendTrajsThread = std::thread(&Server::SendTrajsLoop, this);
   }
 
@@ -31,7 +31,7 @@ namespace remora {
     Stop();
     listenThread.join();
     allocatorThread.join();
-    manageMessagesThread.join();
+    // manageMessagesThread.join();
     // sendDataThread.join();
 
     delete remoraMessenger;
@@ -124,28 +124,28 @@ namespace remora {
     try {
       finalJson = json::parse(theJson);
     } catch(json::parse_error){
-      finalJson = ""_json;
+      finalJson = "{}"_json;
     }
     return finalJson;
   }
 
   void Server::AllocateThreadsLoop(){
     while (running){
-      if (ViewNNewClients() == 0) continue;
+      // if (ViewNNewClients() == 0) continue;
 
       // allocate thread for new sockets
 
       // only allocate if there are no messages in queue
-      while (ViewNMessages() != 0){}
+      // while (ViewNMessages() != 0){}
 
-      int newClient = PopNewClient();
+      // int newClient = PopNewClient();
 
       // create an unsent entry for them
-      AddClientToUnsent(newClient);
+      // AddClientToUnsent(newClient);
 
-      std::thread(&Server::ClientLoop, this, newClient).detach();
+      // std::thread(&Server::ClientLoop, this, newClient).detach();
 
-      nThreads++;
+      // nThreads++;
     }
   }
 
@@ -159,12 +159,12 @@ namespace remora {
 
     while (running){
       // send and then wait for response
-      if (ViewNMessages() == 0) continue;
+      if (!messageManager.MessagesWaiting(sock)) continue;
 
       // if we have none to send, continue
-      if (ClientAccessNUnsent(sock) == 0) continue;
+      // if (ClientAccessNUnsent(sock) == 0) continue;
 
-      std::string msgToSend = ViewNextMessage();
+      std::string msgToSend = messageManager.GetNextMessage(sock);
 
       std::cout << "SENDING " << msgToSend << " from thread " << sock << std::endl;
       
@@ -202,8 +202,9 @@ namespace remora {
       if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
         std::cout << "Success!" << std::endl;
-        ClientSubtractFromUnsent(sock);
-        nClientsReceived++;
+        messageManager.PopNextMessage(sock);
+        // ClientSubtractFromUnsent(sock);
+        // nClientsReceived++;
         attempts = 0;
       }
       else if (attempts > 6){
@@ -225,9 +226,10 @@ namespace remora {
   }
 
   void Server::KillClientThread(int sock){
-    nThreads--;
+    // nThreads--;
+    messageManager.RemoveClient(sock);
     cp_close(sock);
-    RemoveClientFromUnsent(sock);
+    // RemoveClientFromUnsent(sock);
     std::cout << "Client " << sock << "disconnected." << std::endl;
   }
 
@@ -256,18 +258,22 @@ namespace remora {
     oss << "REMORA(" << msg << ")";
     std::string formattedString = oss.str();
 
-    // make sure there are some clients
-    if (nThreads == 0){
-      std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
-      return;
+    if (!messageManager.QueueMessageForAll(formattedString)){
+      std::cout << "Can't queue message, no clients connected!" << std::endl;
     }
 
-    // mutex lock it
-    std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
-    messagesToBeSent.push(formattedString);
+    // // make sure there are some clients
+    // if (nThreads == 0){
+    //   std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
+    //   return;
+    // }
 
-    // add to unsent so the clients know there's one waiting
-    AddMessageToUnsent(1);
+    // // mutex lock it
+    // std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
+    // messagesToBeSent.push(formattedString);
+
+    // // add to unsent so the clients know there's one waiting
+    // AddMessageToUnsent(1);
   }
 
   void Server::AcceptConnections() {
@@ -282,7 +288,11 @@ namespace remora {
 
       std::cout << "client connected" << std::endl;
 
-      newSockets.push_back(clientSocket);
+      // newSockets.push_back(clientSocket);
+      messageManager.AddNewClient(clientSocket);
+
+      // detach a thread for it
+      std::thread(&Server::ClientLoop, this, clientSocket).detach();
     }
   }
 
