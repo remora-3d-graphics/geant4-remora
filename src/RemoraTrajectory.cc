@@ -41,7 +41,6 @@ bool TrajectoryManager::FinishTraj(int key) {
 
   finishedTrajs.push(trajsInProgress[key]);
 
-  delete trajsInProgress[key];
   trajsInProgress.erase(key);
   
   if (finishedTrajs.size() > maxTrajs) {
