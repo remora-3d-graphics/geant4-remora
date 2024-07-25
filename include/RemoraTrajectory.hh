@@ -30,7 +30,13 @@ struct Trajectory {
 
 class TrajectoryManager {
 public:
-  TrajectoryManager(){};
+  TrajectoryManager(){
+  };
+
+  bool Exists(int key){
+    return trajsInProgress.count(key);
+  }
+  
 
 private:
   std::map<int, Trajectory> trajsInProgress;
