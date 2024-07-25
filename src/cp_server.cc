@@ -55,6 +55,12 @@ namespace remora {
 
   bool Server::SendOneTraj(Trajectory* traj){
     json theTrajJson = GetTrajJson(traj);
+
+    if (theTrajJson.dump() == ""){
+      std::cout << "SEND TRAJ ERROR: INVALID JSON" << std::endl;
+      return false;
+    }
+
     std::cout << "Sending... ";
     std::cout << theTrajJson << std::endl;
     return true;
@@ -114,7 +120,13 @@ namespace remora {
     theJson.pop_back();
     theJson += "]}}";
 
-    return json::parse(theJson);
+    json finalJson;
+    try {
+      finalJson = json::parse(theJson);
+    } catch(json::parse_error){
+      finalJson = ""_json;
+    }
+    return finalJson;
   }
 
   void Server::AllocateThreadsLoop(){

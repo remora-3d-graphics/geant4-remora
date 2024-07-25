@@ -4,6 +4,7 @@
 #include <string>
 #include <queue>
 #include <unordered_map>
+#include <atomic>
 #include "G4ThreeVector.hh"
 
 namespace remora {
@@ -35,7 +36,7 @@ private:
   std::unordered_map<int, Trajectory*> trajsInProgress;
   std::queue<Trajectory*> finishedTrajs;
   int maxTrajs = 50;
-  bool locked = false;
+  std::atomic<bool> locked = false;
 
   friend class Server;
 };
