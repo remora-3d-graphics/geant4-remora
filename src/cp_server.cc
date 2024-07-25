@@ -46,36 +46,75 @@ namespace remora {
       if (trajManager.GetNTrajectories() == 0) continue;
 
       Trajectory* nextTraj = trajManager.GetNextTrajectory();
-
-      std::cout 
-      << "Next traj points: ";
       
-      while (!nextTraj->points.empty()){
-        G4ThreeVector nextPt = nextTraj->points.front();
-        nextTraj->points.pop();
-        std::cout
-        << "("
-        << nextPt.getX()
-        << ","
-        << nextPt.getY()
-        << ","
-        << nextPt.getZ()
-        << ")";
-      }
-      std::cout << std::endl;
+      SendOneTraj(nextTraj);
 
       trajManager.PopNextTrajectory(); // SEG FAULT..?
     }
   }
 
   bool Server::SendOneTraj(Trajectory* traj){
-
+    json theTrajJson = GetTrajJson(traj);
+    std::cout << "Sending... ";
+    std::cout << theTrajJson << std::endl;
     return true;
   }
 
   json Server::GetTrajJson(Trajectory* traj){
-    
-    return ""_json;
+    /*FORMAT:
+    {
+    "THE_SHAPE'S_NAME": {
+      "vertices": [
+        [0, 0, 9],
+        [1, 2, 3],
+        [3, 4, 5]
+      ],
+      "indices": [
+        [0, 1],
+        [1, 2],
+        [2, 1]
+      ]
+      }
+    }
+    */
+
+    auto formatCoord = [](float coord) {
+      return std::to_string(static_cast<int>(coord));
+    };
+
+
+    G4String theJson = "{\"traj";
+    theJson += traj->name;
+    theJson += std::to_string(traj->id);
+    theJson += "\":{\"vertices\":[";
+
+    // save for later before I start popping
+    int nPoints = traj->points.size();
+
+    while (!traj->points.empty()){
+      G4ThreeVector nextPt = traj->points.front();
+      traj->points.pop();
+      theJson += "[";
+      theJson += formatCoord(nextPt.getX());
+      theJson += ",";
+      theJson += formatCoord(nextPt.getY());
+      theJson += ",";
+      theJson += formatCoord(nextPt.getZ());
+      theJson += "],";
+    }
+    theJson.pop_back();
+    theJson += "],\"indices\":[";
+    for (int i=0; i < nPoints-1; i++){
+      theJson += "[";
+      theJson += std::to_string(i);
+      theJson += ",";
+      theJson += std::to_string(i+1);
+      theJson += "],";
+    }
+    theJson.pop_back();
+    theJson += "]}}";
+
+    return json::parse(theJson);
   }
 
   void Server::AllocateThreadsLoop(){
