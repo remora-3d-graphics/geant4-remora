@@ -19,7 +19,12 @@ using namespace remora;
 
 int main(int argc, char** argv)
 {
-	// Start (or don't) a UI
+
+  // remora server:
+  
+  Server server;
+	
+  // Start (or don't) a UI
 	G4UIExecutive* ui = nullptr;
 	if (argc == 1) {
 		ui = new G4UIExecutive(argc, argv);
@@ -35,7 +40,7 @@ int main(int argc, char** argv)
 	// set our three initializations
 	runManager->SetUserInitialization(new PhysicsList());
 	runManager->SetUserInitialization(new DetectorConstruction());
-	runManager->SetUserInitialization(new ActionInit());
+	runManager->SetUserInitialization(new ActionInit(&server));
 
 
 	// include a vismanager
@@ -51,9 +56,6 @@ int main(int argc, char** argv)
 		UImanager->ApplyCommand(command + fileName);
 	}
 	else {
-
-    // start server
-    Server server;
 
 		// use UI
 		ui->SessionStart();

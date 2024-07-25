@@ -5,14 +5,21 @@
 #include "PGA.hh"
 #include "RunAction.hh"
 
+#include "cp_server.hh"
+
+using namespace remora;
+
 namespace gps_test {
 
 	class ActionInit : public G4VUserActionInitialization {
 	public:
-		ActionInit() {};
+		ActionInit(Server* pRemoraServer_) : pRemoraServer(pRemoraServer_) {};
 
 		void Build() const override;
 		void BuildForMaster() const override;
+
+  private:
+    Server* pRemoraServer;
 	};
 
 } // !gps_test

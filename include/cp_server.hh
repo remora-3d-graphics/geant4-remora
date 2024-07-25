@@ -14,6 +14,7 @@
 #include <mutex>
 #include <atomic>
 #include <shared_mutex>
+#include <map>
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -21,6 +22,11 @@
 #include "G4Point3D.hh"
 #include "G4VSolid.hh"
 #include "G4Polyhedron.hh"
+
+// remora includes
+#include "RemoraSteppingAction.hh"
+#include "RemoraTrajectory.hh"
+
 
 using json = nlohmann::json;
 
@@ -34,6 +40,8 @@ namespace remora {
 		~Server();
 
 		void QueueMessageToBeSent(std::string msg);
+
+    RemoraSteppingAction* GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction=nullptr);
 
 	private:
 		int Init();
@@ -51,7 +59,11 @@ namespace remora {
     int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
     json GetJsonFromVolume(const G4VPhysicalVolume* volume);
 
-    int SendTracks(){ return 0; };
+    // send trajectory stuff
+    TrajectoryManager trajManager;
+    void SendTrajsLoop();
+    bool SendOneTraj(Trajectory traj){return true;}
+    json GetTrajJson(Trajectory traj){return ""_json;}
 
     // client thread stuff
     void AllocateThreadsLoop();
@@ -94,6 +106,7 @@ namespace remora {
     std::thread allocatorThread;
     std::thread manageMessagesThread;
     std::thread timeOutThread; // todo... seriously though
+    std::thread sendTrajsThread;
 
 		std::queue<std::string> messagesToBeSent;
 

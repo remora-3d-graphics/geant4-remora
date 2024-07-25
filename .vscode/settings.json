@@ -99,6 +99,7 @@
     "vec4": "cpp",
     "vector3": "cpp",
     "event": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "queue": "cpp"
   }
 }

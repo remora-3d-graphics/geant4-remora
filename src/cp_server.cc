@@ -24,6 +24,7 @@ namespace remora {
     sendDataThread = std::thread(&Server::SendMessages, this);
     allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
     manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this);
+    sendTrajsThread = std::thread(&Server::SendTrajsLoop, this);
   }
 
   Server::~Server() {
@@ -34,6 +35,37 @@ namespace remora {
     // sendDataThread.join();
 
     delete remoraMessenger;
+  }
+
+  RemoraSteppingAction* Server::GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction){
+    return new RemoraSteppingAction(&trajManager, prevSteppingAction);
+  }
+
+  void Server::SendTrajsLoop(){
+    while (running){
+      if (trajManager.GetNTrajectories() == 0) continue;
+
+      Trajectory* nextTraj = trajManager.GetNextTrajectory();
+
+      std::cout 
+      << "Next traj points: ";
+      
+      while (!nextTraj->points.empty()){
+        G4ThreeVector nextPt = nextTraj->points.front();
+        nextTraj->points.pop();
+        std::cout
+        << "("
+        << nextPt.getX()
+        << ","
+        << nextPt.getY()
+        << ","
+        << nextPt.getZ()
+        << ")";
+      }
+      std::cout << std::endl;
+
+      trajManager.PopNextTrajectory(); // SEG FAULT..?
+    }
   }
 
   void Server::AllocateThreadsLoop(){
