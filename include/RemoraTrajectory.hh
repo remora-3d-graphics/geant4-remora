@@ -3,7 +3,7 @@
 
 #include <string>
 #include <queue>
-#include <map>
+#include <unordered_map>
 #include "G4ThreeVector.hh"
 
 namespace remora {
@@ -36,10 +36,34 @@ public:
   bool Exists(int key){
     return trajsInProgress.count(key);
   }
+
+  bool AddTraj(int key, std::string name){
+    if (Exists(key)) return false;
+
+    trajsInProgress[key] = Trajectory(name);
+    return true;
+  }
+
+  bool AddPoint(int key, G4ThreeVector pt){
+    if (!Exists(key)) return false;
+
+    trajsInProgress[key].AddPoint(pt);
+    return true;
+  }
+
+  bool FinishTraj(int key){
+    // moves from 'in progress' to 'finished'
+    if (!Exists(key)) return false;
+
+    finishedTrajs.push(trajsInProgress[key]);
+    trajsInProgress.erase(key);
+
+    return true;
+  }
   
 
 private:
-  std::map<int, Trajectory> trajsInProgress;
+  std::unordered_map<int, Trajectory> trajsInProgress;
   std::queue<Trajectory> finishedTrajs;
 };
 
