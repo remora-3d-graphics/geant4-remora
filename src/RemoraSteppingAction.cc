@@ -20,7 +20,18 @@ void RemoraSteppingAction::SetSteppingManagerPointer(G4SteppingManager* pValue){
 void RemoraSteppingAction::UserSteppingAction(const G4Step* aStep){
   if (pPrevAction) pPrevAction->UserSteppingAction(aStep);
 
-  std::cout << "Stepping: " << aStep->GetTrack()->GetTrackID() << std::endl;
+  int id = aStep->GetTrack()->GetTrackID();
+  
+  if (!pTrajManager->Exists(id)){
+    G4String name = aStep->GetTrack()->GetParticleDefinition()->GetParticleName();
+    pTrajManager->AddTraj(id, name);
+  }
+
+  pTrajManager->AddPoint(id, aStep->GetPostStepPoint()->GetPosition());
+
+  if (aStep->GetTrack()->GetTrackStatus() != fAlive){
+    pTrajManager->FinishTraj(id);
+  }
 }
 
 
