@@ -27,8 +27,21 @@ namespace remora {
       serverPtr->QueueMessageToBeSent(rmShapesCommand);
     }
     if (cmd == fChangeColorCmd){
-      G4String changeColorCmd = "Color" + newValues;
-      serverPtr->QueueMessageToBeSent(changeColorCmd);
+      G4ThreeVector rgb = fChangeColorCmd->GetNew3VectorValue(newValues);
+
+      // just making sure it's between 0 and 255
+      if (
+        rgb.getX() > 255 || rgb.getY() > 255 || rgb.getZ() > 255 ||
+        rgb.getX() < 0 || rgb.getY() < 0 || rgb.getZ() < 0
+        ) {
+          G4cout << "Error sending change color command: "
+          << "rgb values must be between 0 and 255. " << G4endl;
+        }
+      else {
+        G4String changeColorCmd = "Color" + newValues;
+        serverPtr->QueueMessageToBeSent(changeColorCmd);
+      }
+
     }
 	}
 }
