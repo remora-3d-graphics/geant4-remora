@@ -55,9 +55,23 @@ namespace gps_test {
 
 		new G4PVPlacement(
 			nullptr,
-			G4ThreeVector(0, 0, 5 * cm),
+			G4ThreeVector(0, 10 * cm, 5 * cm),
 			flogicObj,
 			"physObj",
+			logicWorld,
+			false,
+			0
+		);
+
+		G4Box* solidObj2 = new G4Box("solidObj2", 3 * cm, 3 * cm, 3 * cm);
+
+		G4LogicalVolume* logicObj2 = new G4LogicalVolume(solidObj2, Ti, "logicObj2");
+
+		new G4PVPlacement(
+			nullptr,
+			G4ThreeVector(3 * cm, 0 * cm, -5 * cm),
+			logicObj2,
+			"physObj2",
 			logicWorld,
 			false,
 			0
