@@ -4,6 +4,7 @@
 #include "G4UImessenger.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithoutParameter.hh"
+#include "G4UIcmdWith3Vector.hh"
 
 #include "cp_server.hh"
 
@@ -25,6 +26,7 @@ namespace remora {
 		G4UIcmdWithAString* fChangeTitleCmd;
     G4UIcmdWithoutParameter* fSendDetectorsCmd;
     G4UIcmdWithAString* fRmShapeWithNameCmd;
+    G4UIcmdWith3Vector* fChangeColorCmd;
 	
 	};
 }

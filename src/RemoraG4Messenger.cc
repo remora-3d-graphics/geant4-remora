@@ -9,7 +9,8 @@ namespace remora {
     fSendDetectorsCmd = new G4UIcmdWithoutParameter("/remora/sendDetectors", this);
     fRmShapeWithNameCmd = new G4UIcmdWithAString("/remora/removeShapeWithName", this);
     fRmShapeWithNameCmd->SetGuidance("Removes all shapes who's name start with the inputted string. Useful for removing all particle trajectories. e.g.: /remora/removeShapeWithName particle");
-
+    fChangeColorCmd = new G4UIcmdWith3Vector("/remora/changeColor", this);
+    fChangeColorCmd->SetGuidance("Changes color based on the R, G, B, values input.");
 
 	}
 
@@ -24,6 +25,10 @@ namespace remora {
     if (cmd == fRmShapeWithNameCmd){
       G4String rmShapesCommand = "RmShape" + newValues;
       serverPtr->QueueMessageToBeSent(rmShapesCommand);
+    }
+    if (cmd == fChangeColorCmd){
+      G4String changeColorCmd = "Color" + newValues;
+      serverPtr->QueueMessageToBeSent(changeColorCmd);
     }
 	}
 }
