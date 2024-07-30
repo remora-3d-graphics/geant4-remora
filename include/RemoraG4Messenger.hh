@@ -1,6 +1,8 @@
 #ifndef REMORA_G4_MESSENGER_HH
 #define REMORA_G4_MESSENGER_HH
 
+#include <string>
+
 #include "G4UImessenger.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithoutParameter.hh"

@@ -38,7 +38,12 @@ namespace remora {
           << "rgb values must be between 0 and 255. " << G4endl;
         }
       else {
-        G4String changeColorCmd = "Color" + newValues;
+        G4String changeColorCmd = "Color";
+        changeColorCmd += std::to_string(int(rgb.getX()));
+        changeColorCmd += ",";
+        changeColorCmd += std::to_string(int(rgb.getY()));
+        changeColorCmd += ",";
+        changeColorCmd += std::to_string(int(rgb.getZ()));
         serverPtr->QueueMessageToBeSent(changeColorCmd);
       }
 
