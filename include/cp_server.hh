@@ -47,14 +47,12 @@ namespace remora {
 	private:
 		int Init();
 		void AcceptConnections();
-		void SendMessages();
 
 		int listenSocket;
 
 		void Stop() { running = false; }
 
 		int SendWelcomeMessage(int newSocket);
-		int SendToAll(std::string msg);
 
     int SendDetectors(int sock=-1);
     int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
@@ -67,35 +65,19 @@ namespace remora {
     json GetTrajJson(Trajectory* traj);
 
     // client thread stuff
-    void AllocateThreadsLoop();
     std::atomic<int> nThreads = 0;
     std::atomic<int> nClientsReceived = 0;
     void ClientLoop(int sock);
-    void ManageMessagesLoop();
 
     std::mutex newClientsWriteMutex;
     std::shared_mutex newClientsReadMutex;
     std::mutex messageQueueWriteMutex;
     std::shared_mutex messageQueueReadMutex;
 
-    // functions that need a mutex
-    int ViewNMessages();
-    std::string ViewNextMessage();
-    void PopNextMessage();
-
-    int ViewNNewClients();
-    void PushNewClient(int sock);
-    int PopNewClient();
-
     std::unordered_map<int, int> clientsUnsent; // tells clients how many messages they haven't sent yet
     std::shared_mutex clientsUnsentMutex;
     std::mutex masterUnsentMutex;
 
-    void AddClientToUnsent(unsigned int clientSock);
-    void RemoveClientFromUnsent(unsigned int clientSock);
-    void AddMessageToUnsent(unsigned int num);
-    unsigned int ClientAccessNUnsent(unsigned int clientSock);
-    void ClientSubtractFromUnsent(unsigned int clientSock);
 
     void KillClientThread(int sock);
 
