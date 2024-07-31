@@ -26,6 +26,7 @@
 // remora includes
 #include "RemoraSteppingAction.hh"
 #include "RemoraTrajectory.hh"
+#include "MessageManager.hh"
 
 
 using json = nlohmann::json;
@@ -107,6 +108,8 @@ namespace remora {
     std::thread manageMessagesThread;
     std::thread timeOutThread; // todo... seriously though
     std::thread sendTrajsThread;
+
+    MessageManager messageManager;
 
 		std::queue<std::string> messagesToBeSent;
 
