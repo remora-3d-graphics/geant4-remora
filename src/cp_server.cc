@@ -21,9 +21,6 @@ namespace remora {
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    // sendDataThread = std::thread(&Server::SendMessages, this); // just debug
-    // allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
-    // manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this); // moved to MessageManager
     sendTrajsThread = std::thread(&Server::SendTrajsLoop, this);
   }
 
@@ -31,8 +28,6 @@ namespace remora {
     Stop();
     listenThread.join();
     allocatorThread.join();
-    // manageMessagesThread.join();
-    // sendDataThread.join();
 
     delete remoraMessenger;
   }
@@ -127,26 +122,6 @@ namespace remora {
       finalJson = "{}"_json;
     }
     return finalJson;
-  }
-
-  void Server::AllocateThreadsLoop(){
-    while (running){
-      // if (ViewNNewClients() == 0) continue;
-
-      // allocate thread for new sockets
-
-      // only allocate if there are no messages in queue
-      // while (ViewNMessages() != 0){}
-
-      // int newClient = PopNewClient();
-
-      // create an unsent entry for them
-      // AddClientToUnsent(newClient);
-
-      // std::thread(&Server::ClientLoop, this, newClient).detach();
-
-      // nThreads++;
-    }
   }
 
   void Server::ClientLoop(int sock){
