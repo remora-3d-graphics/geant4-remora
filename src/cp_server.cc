@@ -178,8 +178,6 @@ namespace remora {
         // success!
         std::cout << "Success!" << std::endl;
         messageManager.PopNextMessage(sock);
-        // ClientSubtractFromUnsent(sock);
-        // nClientsReceived++;
         attempts = 0;
       }
       else if (attempts > 6){
@@ -201,31 +199,10 @@ namespace remora {
   }
 
   void Server::KillClientThread(int sock){
-    // nThreads--;
     messageManager.RemoveClient(sock);
     cp_close(sock);
-    // RemoveClientFromUnsent(sock);
     std::cout << "Client " << sock << "disconnected." << std::endl;
   }
-
-  void Server::ManageMessagesLoop(){
-    while (running){
-      if (ViewNMessages() == 0) continue;
-
-      // clear out messages if there are no clients connected
-      if (nThreads == 0){
-        PopNextMessage();
-        continue;
-      }
-
-      if (nThreads == nClientsReceived) {
-        // msg sent to all threads
-        nClientsReceived = 0;
-        PopNextMessage();
-      }
-    }
-  }
-  
 
   void Server::QueueMessageToBeSent(std::string msg){
     // enforce the wrapper
@@ -236,19 +213,6 @@ namespace remora {
     if (!messageManager.QueueMessageForAll(formattedString)){
       std::cout << "Can't queue message, no clients connected!" << std::endl;
     }
-
-    // // make sure there are some clients
-    // if (nThreads == 0){
-    //   std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
-    //   return;
-    // }
-
-    // // mutex lock it
-    // std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
-    // messagesToBeSent.push(formattedString);
-
-    // // add to unsent so the clients know there's one waiting
-    // AddMessageToUnsent(1);
   }
 
   void Server::AcceptConnections() {
@@ -263,33 +227,10 @@ namespace remora {
 
       std::cout << "client connected" << std::endl;
 
-      // newSockets.push_back(clientSocket);
       messageManager.AddNewClient(clientSocket);
 
       // detach a thread for it
       std::thread(&Server::ClientLoop, this, clientSocket).detach();
-    }
-  }
-
-  void Server::SendMessages() {
-
-    while (running) {
-
-      // for now just a debug print
-      std::cout 
-      << "DEBUG: "
-      << "N Threads: "
-      << nThreads
-      << " N Received: "
-      << nClientsReceived
-      << " front of queue: "
-      << ViewNextMessage()
-      << std::endl;
-
-      std::this_thread::sleep_for(std::chrono::seconds(3));
-
-
-      continue;
     }
   }
 
