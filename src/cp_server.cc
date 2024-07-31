@@ -136,14 +136,11 @@ namespace remora {
       // send and then wait for response
       if (!messageManager.MessagesWaiting(sock)) continue;
 
-      // if we have none to send, continue
-      // if (ClientAccessNUnsent(sock) == 0) continue;
-
       std::string msgToSend = messageManager.GetNextMessage(sock);
 
-      G4cout << "SENDING " << msgToSend << " from thread " << sock << G4endl;
+      // G4cout << "SENDING " << msgToSend << " from thread " << sock << G4endl;
       
-      // TODO::::: send in chunks!
+      // send in chunks!
       int chunkSize = 1000;
 
       const char* msg = msgToSend.c_str();
@@ -176,7 +173,6 @@ namespace remora {
 
       if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
-        G4cout << "Success!" << G4endl;
         messageManager.PopNextMessage(sock);
         attempts = 0;
       }
