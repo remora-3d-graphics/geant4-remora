@@ -238,7 +238,6 @@ namespace remora {
     // get world from runManager. Note: got this line from G4VisManager.hh
     const G4VPhysicalVolume *world = G4RunManagerFactory::GetMasterRunManagerKernel()->GetCurrentWorld();
 
-    G4cout << "World ptr: " << world << G4endl;
     if (!world){
       G4cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << G4endl;
       return 1;
@@ -261,9 +260,6 @@ namespace remora {
 
       json shapeJson = GetJsonFromVolume(volume);
       wrapper[name] = shapeJson;
-
-      // debug print
-      G4cout << wrapper << G4endl;
 
       G4String cmd = "AddShapes" + wrapper.dump();
       QueueMessageToBeSent(cmd);
