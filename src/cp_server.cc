@@ -3,36 +3,31 @@
 
 namespace remora {
   Server::Server() {
-    std::cout << "Hello Server" << std::endl;
+    G4cout << "Hello Server" << G4endl;
 
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
 
     // currently the Init() function blocks Geant4 execution. TODO: put it on a thread
     if (Init() != 0) {
-      std::cout
+      G4cout
         << "Server did not initialize properly. "
-        << std::endl
+        << G4endl
         << "To use a server for visualization, please restart the app."
-        << std::endl;
+        << G4endl;
 
       return;
     }
 
     // runs concurrently with the rest of the main function
     listenThread = std::thread(&Server::AcceptConnections, this);
-    // sendDataThread = std::thread(&Server::SendMessages, this); // just debug
-    // allocatorThread = std::thread(&Server::AllocateThreadsLoop, this);
-    // manageMessagesThread = std::thread(&Server::ManageMessagesLoop, this); // moved to MessageManager
     sendTrajsThread = std::thread(&Server::SendTrajsLoop, this);
   }
 
   Server::~Server() {
     Stop();
     listenThread.join();
-    allocatorThread.join();
-    // manageMessagesThread.join();
-    // sendDataThread.join();
+    sendTrajsThread.join();
 
     delete remoraMessenger;
   }
@@ -57,7 +52,7 @@ namespace remora {
     json theTrajJson = GetTrajJson(traj);
 
     if (theTrajJson.dump() == ""){
-      std::cout << "SEND TRAJ ERROR: INVALID JSON" << std::endl;
+      G4cout << "SEND TRAJ ERROR: INVALID JSON" << G4endl;
       return false;
     }
 
@@ -129,46 +124,23 @@ namespace remora {
     return finalJson;
   }
 
-  void Server::AllocateThreadsLoop(){
-    while (running){
-      // if (ViewNNewClients() == 0) continue;
-
-      // allocate thread for new sockets
-
-      // only allocate if there are no messages in queue
-      // while (ViewNMessages() != 0){}
-
-      // int newClient = PopNewClient();
-
-      // create an unsent entry for them
-      // AddClientToUnsent(newClient);
-
-      // std::thread(&Server::ClientLoop, this, newClient).detach();
-
-      // nThreads++;
-    }
-  }
-
   void Server::ClientLoop(int sock){
     int attempts = 0;
 
     // send welcome message
     int sent = SendWelcomeMessage(sock);
-    std::cout << "Sent message with code: " << sent << std::endl;
+    G4cout << "Sent message with code: " << sent << G4endl;
     if (sent != 0) return;
 
     while (running){
       // send and then wait for response
       if (!messageManager.MessagesWaiting(sock)) continue;
 
-      // if we have none to send, continue
-      // if (ClientAccessNUnsent(sock) == 0) continue;
-
       std::string msgToSend = messageManager.GetNextMessage(sock);
 
-      std::cout << "SENDING " << msgToSend << " from thread " << sock << std::endl;
+      // G4cout << "SENDING " << msgToSend << " from thread " << sock << G4endl;
       
-      // TODO::::: send in chunks!
+      // send in chunks!
       int chunkSize = 1000;
 
       const char* msg = msgToSend.c_str();
@@ -183,7 +155,7 @@ namespace remora {
         bytes_sent = send(sock, msg + total_sent, to_send, 0);
         if (bytes_sent == -1) {
           // Handle error
-          std::cerr << "Error sending message" << std::endl;
+          std::cerr << "Error sending message" << G4endl;
           break;
         }
         total_sent += bytes_sent;
@@ -201,10 +173,7 @@ namespace remora {
 
       if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
-        std::cout << "Success!" << std::endl;
         messageManager.PopNextMessage(sock);
-        // ClientSubtractFromUnsent(sock);
-        // nClientsReceived++;
         attempts = 0;
       }
       else if (attempts > 6){
@@ -219,38 +188,17 @@ namespace remora {
       }
       else {
         // try again
-        std::cout << "ERROR: client said: " << buff << std::endl;
+        G4cout << "ERROR: client said: " << buff << G4endl;
         attempts++;
       }
     }
   }
 
   void Server::KillClientThread(int sock){
-    // nThreads--;
     messageManager.RemoveClient(sock);
     cp_close(sock);
-    // RemoveClientFromUnsent(sock);
-    std::cout << "Client " << sock << "disconnected." << std::endl;
+    G4cout << "Client " << sock << "disconnected." << G4endl;
   }
-
-  void Server::ManageMessagesLoop(){
-    while (running){
-      if (ViewNMessages() == 0) continue;
-
-      // clear out messages if there are no clients connected
-      if (nThreads == 0){
-        PopNextMessage();
-        continue;
-      }
-
-      if (nThreads == nClientsReceived) {
-        // msg sent to all threads
-        nClientsReceived = 0;
-        PopNextMessage();
-      }
-    }
-  }
-  
 
   void Server::QueueMessageToBeSent(std::string msg){
     // enforce the wrapper
@@ -259,21 +207,8 @@ namespace remora {
     std::string formattedString = oss.str();
 
     if (!messageManager.QueueMessageForAll(formattedString)){
-      std::cout << "Can't queue message, no clients connected!" << std::endl;
+      G4cout << "Can't queue message, no clients connected!" << G4endl;
     }
-
-    // // make sure there are some clients
-    // if (nThreads == 0){
-    //   std::cout << "Could not add message to queue, there are no clients connected." << std::endl;
-    //   return;
-    // }
-
-    // // mutex lock it
-    // std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
-    // messagesToBeSent.push(formattedString);
-
-    // // add to unsent so the clients know there's one waiting
-    // AddMessageToUnsent(1);
   }
 
   void Server::AcceptConnections() {
@@ -283,12 +218,11 @@ namespace remora {
       clientSocket = accept(listenSocket, NULL, NULL);
 
       if (clientSocket == -1) {
-        std::cout << "Accept failed" << std::endl;
+        G4cout << "Accept failed" << G4endl;
       }
 
-      std::cout << "client connected" << std::endl;
+      G4cout << "client connected" << G4endl;
 
-      // newSockets.push_back(clientSocket);
       messageManager.AddNewClient(clientSocket);
 
       // detach a thread for it
@@ -296,35 +230,12 @@ namespace remora {
     }
   }
 
-  void Server::SendMessages() {
-
-    while (running) {
-
-      // for now just a debug print
-      std::cout 
-      << "DEBUG: "
-      << "N Threads: "
-      << nThreads
-      << " N Received: "
-      << nClientsReceived
-      << " front of queue: "
-      << ViewNextMessage()
-      << std::endl;
-
-      std::this_thread::sleep_for(std::chrono::seconds(3));
-
-
-      continue;
-    }
-  }
-
   int Server::SendDetectors(int sock){
     // get world from runManager. Note: got this line from G4VisManager.hh
     const G4VPhysicalVolume *world = G4RunManagerFactory::GetMasterRunManagerKernel()->GetCurrentWorld();
 
-    std::cout << "World ptr: " << world << std::endl;
     if (!world){
-      std::cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << std::endl;
+      G4cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << G4endl;
       return 1;
     }
 
@@ -345,9 +256,6 @@ namespace remora {
 
       json shapeJson = GetJsonFromVolume(volume);
       wrapper[name] = shapeJson;
-
-      // debug print
-      std::cout << wrapper << std::endl;
 
       G4String cmd = "AddShapes" + wrapper.dump();
       QueueMessageToBeSent(cmd);
@@ -426,28 +334,6 @@ namespace remora {
     return solidJson;
   }
 
-  int Server::SendToAll(std::string strmsg) {
-
-    int returnCode = 0;
-
-    for (int s : sockets) {
-      const char* msg = strmsg.c_str();
-      int len, bytes_sent;
-
-      len = strlen(msg);
-      bytes_sent = send(s, msg, len, 0);
-
-      if (bytes_sent != len) {
-        std::cout << "The whole message wasn't quite sent!" << std::endl;
-        // return 1;
-      }
-      else {
-        std::cout << "Sent message" << std::endl;
-      }
-    }
-
-    return returnCode;
-  }
 
   int Server::SendWelcomeMessage(int clientSocket) {
     // send a message over
@@ -457,11 +343,11 @@ namespace remora {
     int bytes_sent = send(clientSocket, msg.data(), len, 0);
 
     if (bytes_sent != len) {
-      std::cout << "The whole message wasn't quite sent!" << std::endl;
+      G4cout << "The whole message wasn't quite sent!" << G4endl;
       // return 1;
     }
     else {
-      std::cout << "Sent message" << std::endl;
+      G4cout << "Sent message" << G4endl;
     }
 
     char response[1024] = { 0 };
@@ -471,11 +357,11 @@ namespace remora {
     bytesReceived = recv(clientSocket, response, sizeof(response), 0);
 
     if (bytesReceived <= 0){
-      std::cout << "Socket closed by client" << std::endl;
+      G4cout << "Socket closed by client" << G4endl;
       return 1;
     }
 
-    std::cout << "From socket " << clientSocket << ": " << response << std::endl;
+    G4cout << "From socket " << clientSocket << ": " << response << G4endl;
 
     return 0;
   }
@@ -485,7 +371,7 @@ namespace remora {
 
     status = cp_init();
     if (status != 0) {
-      std::cout << "Did not init correctly: " << status << std::endl;
+      G4cout << "Did not init correctly: " << status << G4endl;
       return 1;
     }
 
@@ -495,11 +381,11 @@ namespace remora {
 
     status = getaddrinfo(0, "8080", &hints, &res); // hardcoded
     if (status != 0) {
-      std::cout << "get addr info failed: " << status << std::endl;
+      G4cout << "get addr info failed: " << status << G4endl;
       return 1;
     }
 
-    std::cout << "get addr info succeeded" << std::endl;
+    G4cout << "get addr info succeeded" << G4endl;
 
     listenSocket = -1;
     for (rp = res; rp != NULL; rp = rp->ai_next) {
@@ -513,128 +399,37 @@ namespace remora {
     }
 
     if (rp == NULL) {
-      std::cout << "Could not bind" << std::endl;
+      G4cout << "Could not bind" << G4endl;
       return 1;
     }
 
-    std::cout << "Bound socket successfully" << std::endl;
+    G4cout << "Bound socket successfully" << G4endl;
 
     char hostname[100];
     char portname[100];
     getnameinfo(res->ai_addr, res->ai_addrlen, hostname, sizeof hostname, portname, sizeof portname, NI_NUMERICHOST | NI_NUMERICSERV);
 
-    std::cout << "HOST: " << hostname << " PORT: " << portname << std::endl;
+    G4cout << "HOST: " << hostname << " PORT: " << portname << G4endl;
 
     freeaddrinfo(res);
 
 
     if (listenSocket == -1) {
-      std::cout << "Error creating listen socket: " << std::endl;
+      G4cout << "Error creating listen socket: " << G4endl;
       return 1;
     }
 
-    std::cout << "listen socket created" << std::endl;
+    G4cout << "listen socket created" << G4endl;
 
-    std::cout << "Listening..." << std::endl;
+    G4cout << "Listening..." << G4endl;
 
     if (listen(listenSocket, 100) == -1) {
-      std::cout << "Listen error" << std::endl;
+      G4cout << "Listen error" << G4endl;
       cp_close(listenSocket);
       return 1;
     }
 
     return 0;
-  }
-
-
-  // Mutex management
-  int Server::ViewNMessages(){
-    std::shared_lock<std::shared_mutex> lock(messageQueueReadMutex);
-
-    return messagesToBeSent.size();
-  }
-
-  std::string Server::ViewNextMessage(){
-    std::shared_lock<std::shared_mutex> lock(messageQueueReadMutex);
-
-    if (messagesToBeSent.empty()){
-      return "";
-    }
-
-    return messagesToBeSent.front();
-  }
-
-  void Server::PopNextMessage(){
-    std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
-
-    if (messagesToBeSent.empty()){
-      std::cout << "Cant pop, message queue empty!" << std::endl;
-      return;
-    }
-
-    messagesToBeSent.pop();
-  }
-
-  int Server::ViewNNewClients(){
-    std::shared_lock<std::shared_mutex> lock(newClientsReadMutex);
-
-    return newSockets.size();
-  }
-
-  void Server::PushNewClient(int sock){
-    std::unique_lock<std::mutex> lock(newClientsWriteMutex);
-
-    newSockets.push_back(sock);
-  }
-
-  int Server::PopNewClient(){
-    std::unique_lock<std::mutex> lock(newClientsWriteMutex);
-
-    int newClient;
-    if (newSockets.empty()){
-      std::cout << "Can't pop newSockets, it's empty!" << std::endl;
-      return -1;
-    }
-
-    newClient = newSockets.front();
-    newSockets.pop_front();
-
-    return newClient;
-  }
-
-
-  void Server::AddClientToUnsent(unsigned int clientSock){
-    std::unique_lock<std::mutex> lock(masterUnsentMutex);
-    clientsUnsent[clientSock] = 0;
-  }
-
-  void Server::RemoveClientFromUnsent(unsigned int clientSock){
-    std::unique_lock<std::mutex> lock(masterUnsentMutex);
-    if (clientsUnsent.find(clientSock) != clientsUnsent.end()){
-      clientsUnsent.erase(clientSock);
-    }
-    else {
-      std::cout << "RemoveClientFromUnsent error, client not found in map" << std::endl;
-    }
-  }
-
-  void Server::AddMessageToUnsent(unsigned int num){
-    std::unique_lock<std::mutex> lock(masterUnsentMutex);
-    for (auto& entry : clientsUnsent){
-      entry.second += 1;
-    }
-  }
-
-  unsigned int Server::ClientAccessNUnsent(unsigned int clientSock){
-    std::shared_lock<std::shared_mutex> lock(clientsUnsentMutex);
-
-    return clientsUnsent[clientSock];
-  }
-
-  void Server::ClientSubtractFromUnsent(unsigned int clientSock){
-    std::shared_lock<std::shared_mutex> lock(clientsUnsentMutex);
-
-    clientsUnsent[clientSock] -= 1;
   }
 
 } // ! namespace remora
