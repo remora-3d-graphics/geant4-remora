@@ -342,28 +342,6 @@ namespace remora {
     return solidJson;
   }
 
-  int Server::SendToAll(std::string strmsg) {
-
-    int returnCode = 0;
-
-    for (int s : sockets) {
-      const char* msg = strmsg.c_str();
-      int len, bytes_sent;
-
-      len = strlen(msg);
-      bytes_sent = send(s, msg, len, 0);
-
-      if (bytes_sent != len) {
-        std::cout << "The whole message wasn't quite sent!" << std::endl;
-        // return 1;
-      }
-      else {
-        std::cout << "Sent message" << std::endl;
-      }
-    }
-
-    return returnCode;
-  }
 
   int Server::SendWelcomeMessage(int clientSocket) {
     // send a message over
@@ -460,97 +438,6 @@ namespace remora {
     }
 
     return 0;
-  }
-
-
-  // Mutex management
-  int Server::ViewNMessages(){
-    std::shared_lock<std::shared_mutex> lock(messageQueueReadMutex);
-
-    return messagesToBeSent.size();
-  }
-
-  std::string Server::ViewNextMessage(){
-    std::shared_lock<std::shared_mutex> lock(messageQueueReadMutex);
-
-    if (messagesToBeSent.empty()){
-      return "";
-    }
-
-    return messagesToBeSent.front();
-  }
-
-  void Server::PopNextMessage(){
-    std::unique_lock<std::mutex> lock(messageQueueWriteMutex);
-
-    if (messagesToBeSent.empty()){
-      std::cout << "Cant pop, message queue empty!" << std::endl;
-      return;
-    }
-
-    messagesToBeSent.pop();
-  }
-
-  int Server::ViewNNewClients(){
-    std::shared_lock<std::shared_mutex> lock(newClientsReadMutex);
-
-    return newSockets.size();
-  }
-
-  void Server::PushNewClient(int sock){
-    std::unique_lock<std::mutex> lock(newClientsWriteMutex);
-
-    newSockets.push_back(sock);
-  }
-
-  int Server::PopNewClient(){
-    std::unique_lock<std::mutex> lock(newClientsWriteMutex);
-
-    int newClient;
-    if (newSockets.empty()){
-      std::cout << "Can't pop newSockets, it's empty!" << std::endl;
-      return -1;
-    }
-
-    newClient = newSockets.front();
-    newSockets.pop_front();
-
-    return newClient;
-  }
-
-
-  void Server::AddClientToUnsent(unsigned int clientSock){
-    std::unique_lock<std::mutex> lock(masterUnsentMutex);
-    clientsUnsent[clientSock] = 0;
-  }
-
-  void Server::RemoveClientFromUnsent(unsigned int clientSock){
-    std::unique_lock<std::mutex> lock(masterUnsentMutex);
-    if (clientsUnsent.find(clientSock) != clientsUnsent.end()){
-      clientsUnsent.erase(clientSock);
-    }
-    else {
-      std::cout << "RemoveClientFromUnsent error, client not found in map" << std::endl;
-    }
-  }
-
-  void Server::AddMessageToUnsent(unsigned int num){
-    std::unique_lock<std::mutex> lock(masterUnsentMutex);
-    for (auto& entry : clientsUnsent){
-      entry.second += 1;
-    }
-  }
-
-  unsigned int Server::ClientAccessNUnsent(unsigned int clientSock){
-    std::shared_lock<std::shared_mutex> lock(clientsUnsentMutex);
-
-    return clientsUnsent[clientSock];
-  }
-
-  void Server::ClientSubtractFromUnsent(unsigned int clientSock){
-    std::shared_lock<std::shared_mutex> lock(clientsUnsentMutex);
-
-    clientsUnsent[clientSock] -= 1;
   }
 
 } // ! namespace remora
