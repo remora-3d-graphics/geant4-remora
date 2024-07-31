@@ -27,7 +27,7 @@ namespace remora {
   Server::~Server() {
     Stop();
     listenThread.join();
-    allocatorThread.join();
+    sendTrajsThread.join();
 
     delete remoraMessenger;
   }

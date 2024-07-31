@@ -54,6 +54,7 @@ namespace remora {
 
 		int SendWelcomeMessage(int newSocket);
 
+    // send detectors stuff
     int SendDetectors(int sock=-1);
     int SendOneDetector(G4VPhysicalVolume* volume, int sock=-1);
     json GetJsonFromVolume(const G4VPhysicalVolume* volume);
@@ -65,35 +66,16 @@ namespace remora {
     json GetTrajJson(Trajectory* traj);
 
     // client thread stuff
-    std::atomic<int> nThreads = 0;
-    std::atomic<int> nClientsReceived = 0;
     void ClientLoop(int sock);
-
-    std::mutex newClientsWriteMutex;
-    std::shared_mutex newClientsReadMutex;
-    std::mutex messageQueueWriteMutex;
-    std::shared_mutex messageQueueReadMutex;
-
-    std::unordered_map<int, int> clientsUnsent; // tells clients how many messages they haven't sent yet
-    std::shared_mutex clientsUnsentMutex;
-    std::mutex masterUnsentMutex;
-
-
     void KillClientThread(int sock);
 
 		std::list<int> newSockets; // todo: QUEUE
 		std::list<int> sockets;
 
 		std::thread listenThread;
-		std::thread sendDataThread;
-    std::thread allocatorThread;
-    std::thread manageMessagesThread;
-    std::thread timeOutThread; // todo... seriously though
     std::thread sendTrajsThread;
 
     MessageManager messageManager;
-
-		std::queue<std::string> messagesToBeSent;
 
 		std::atomic<bool> running = true;
     bool g4runInitialized = false;
