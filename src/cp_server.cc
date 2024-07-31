@@ -3,18 +3,18 @@
 
 namespace remora {
   Server::Server() {
-    std::cout << "Hello Server" << std::endl;
+    G4cout << "Hello Server" << G4endl;
 
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
 
     // currently the Init() function blocks Geant4 execution. TODO: put it on a thread
     if (Init() != 0) {
-      std::cout
+      G4cout
         << "Server did not initialize properly. "
-        << std::endl
+        << G4endl
         << "To use a server for visualization, please restart the app."
-        << std::endl;
+        << G4endl;
 
       return;
     }
@@ -52,7 +52,7 @@ namespace remora {
     json theTrajJson = GetTrajJson(traj);
 
     if (theTrajJson.dump() == ""){
-      std::cout << "SEND TRAJ ERROR: INVALID JSON" << std::endl;
+      G4cout << "SEND TRAJ ERROR: INVALID JSON" << G4endl;
       return false;
     }
 
@@ -129,7 +129,7 @@ namespace remora {
 
     // send welcome message
     int sent = SendWelcomeMessage(sock);
-    std::cout << "Sent message with code: " << sent << std::endl;
+    G4cout << "Sent message with code: " << sent << G4endl;
     if (sent != 0) return;
 
     while (running){
@@ -141,7 +141,7 @@ namespace remora {
 
       std::string msgToSend = messageManager.GetNextMessage(sock);
 
-      std::cout << "SENDING " << msgToSend << " from thread " << sock << std::endl;
+      G4cout << "SENDING " << msgToSend << " from thread " << sock << G4endl;
       
       // TODO::::: send in chunks!
       int chunkSize = 1000;
@@ -158,7 +158,7 @@ namespace remora {
         bytes_sent = send(sock, msg + total_sent, to_send, 0);
         if (bytes_sent == -1) {
           // Handle error
-          std::cerr << "Error sending message" << std::endl;
+          std::cerr << "Error sending message" << G4endl;
           break;
         }
         total_sent += bytes_sent;
@@ -176,7 +176,7 @@ namespace remora {
 
       if (std::strcmp(buff, "REMORA(0)") == 0){
         // success!
-        std::cout << "Success!" << std::endl;
+        G4cout << "Success!" << G4endl;
         messageManager.PopNextMessage(sock);
         attempts = 0;
       }
@@ -192,7 +192,7 @@ namespace remora {
       }
       else {
         // try again
-        std::cout << "ERROR: client said: " << buff << std::endl;
+        G4cout << "ERROR: client said: " << buff << G4endl;
         attempts++;
       }
     }
@@ -201,7 +201,7 @@ namespace remora {
   void Server::KillClientThread(int sock){
     messageManager.RemoveClient(sock);
     cp_close(sock);
-    std::cout << "Client " << sock << "disconnected." << std::endl;
+    G4cout << "Client " << sock << "disconnected." << G4endl;
   }
 
   void Server::QueueMessageToBeSent(std::string msg){
@@ -211,7 +211,7 @@ namespace remora {
     std::string formattedString = oss.str();
 
     if (!messageManager.QueueMessageForAll(formattedString)){
-      std::cout << "Can't queue message, no clients connected!" << std::endl;
+      G4cout << "Can't queue message, no clients connected!" << G4endl;
     }
   }
 
@@ -222,10 +222,10 @@ namespace remora {
       clientSocket = accept(listenSocket, NULL, NULL);
 
       if (clientSocket == -1) {
-        std::cout << "Accept failed" << std::endl;
+        G4cout << "Accept failed" << G4endl;
       }
 
-      std::cout << "client connected" << std::endl;
+      G4cout << "client connected" << G4endl;
 
       messageManager.AddNewClient(clientSocket);
 
@@ -238,9 +238,9 @@ namespace remora {
     // get world from runManager. Note: got this line from G4VisManager.hh
     const G4VPhysicalVolume *world = G4RunManagerFactory::GetMasterRunManagerKernel()->GetCurrentWorld();
 
-    std::cout << "World ptr: " << world << std::endl;
+    G4cout << "World ptr: " << world << G4endl;
     if (!world){
-      std::cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << std::endl;
+      G4cout << "REMORA: Can't get world! Perhaps try /run/initialize first." << G4endl;
       return 1;
     }
 
@@ -263,7 +263,7 @@ namespace remora {
       wrapper[name] = shapeJson;
 
       // debug print
-      std::cout << wrapper << std::endl;
+      G4cout << wrapper << G4endl;
 
       G4String cmd = "AddShapes" + wrapper.dump();
       QueueMessageToBeSent(cmd);
@@ -351,11 +351,11 @@ namespace remora {
     int bytes_sent = send(clientSocket, msg.data(), len, 0);
 
     if (bytes_sent != len) {
-      std::cout << "The whole message wasn't quite sent!" << std::endl;
+      G4cout << "The whole message wasn't quite sent!" << G4endl;
       // return 1;
     }
     else {
-      std::cout << "Sent message" << std::endl;
+      G4cout << "Sent message" << G4endl;
     }
 
     char response[1024] = { 0 };
@@ -365,11 +365,11 @@ namespace remora {
     bytesReceived = recv(clientSocket, response, sizeof(response), 0);
 
     if (bytesReceived <= 0){
-      std::cout << "Socket closed by client" << std::endl;
+      G4cout << "Socket closed by client" << G4endl;
       return 1;
     }
 
-    std::cout << "From socket " << clientSocket << ": " << response << std::endl;
+    G4cout << "From socket " << clientSocket << ": " << response << G4endl;
 
     return 0;
   }
@@ -379,7 +379,7 @@ namespace remora {
 
     status = cp_init();
     if (status != 0) {
-      std::cout << "Did not init correctly: " << status << std::endl;
+      G4cout << "Did not init correctly: " << status << G4endl;
       return 1;
     }
 
@@ -389,11 +389,11 @@ namespace remora {
 
     status = getaddrinfo(0, "8080", &hints, &res); // hardcoded
     if (status != 0) {
-      std::cout << "get addr info failed: " << status << std::endl;
+      G4cout << "get addr info failed: " << status << G4endl;
       return 1;
     }
 
-    std::cout << "get addr info succeeded" << std::endl;
+    G4cout << "get addr info succeeded" << G4endl;
 
     listenSocket = -1;
     for (rp = res; rp != NULL; rp = rp->ai_next) {
@@ -407,32 +407,32 @@ namespace remora {
     }
 
     if (rp == NULL) {
-      std::cout << "Could not bind" << std::endl;
+      G4cout << "Could not bind" << G4endl;
       return 1;
     }
 
-    std::cout << "Bound socket successfully" << std::endl;
+    G4cout << "Bound socket successfully" << G4endl;
 
     char hostname[100];
     char portname[100];
     getnameinfo(res->ai_addr, res->ai_addrlen, hostname, sizeof hostname, portname, sizeof portname, NI_NUMERICHOST | NI_NUMERICSERV);
 
-    std::cout << "HOST: " << hostname << " PORT: " << portname << std::endl;
+    G4cout << "HOST: " << hostname << " PORT: " << portname << G4endl;
 
     freeaddrinfo(res);
 
 
     if (listenSocket == -1) {
-      std::cout << "Error creating listen socket: " << std::endl;
+      G4cout << "Error creating listen socket: " << G4endl;
       return 1;
     }
 
-    std::cout << "listen socket created" << std::endl;
+    G4cout << "listen socket created" << G4endl;
 
-    std::cout << "Listening..." << std::endl;
+    G4cout << "Listening..." << G4endl;
 
     if (listen(listenSocket, 100) == -1) {
-      std::cout << "Listen error" << std::endl;
+      G4cout << "Listen error" << G4endl;
       cp_close(listenSocket);
       return 1;
     }

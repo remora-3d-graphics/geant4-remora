@@ -22,6 +22,7 @@
 #include "G4Point3D.hh"
 #include "G4VSolid.hh"
 #include "G4Polyhedron.hh"
+#include "G4ios.hh"
 
 // remora includes
 #include "RemoraSteppingAction.hh"
