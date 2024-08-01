@@ -28,6 +28,7 @@
 #include "RemoraSteppingAction.hh"
 #include "RemoraTrajectory.hh"
 #include "MessageManager.hh"
+#include "RemoraStateMachine.hh"
 
 
 using json = nlohmann::json;
@@ -82,6 +83,8 @@ namespace remora {
     bool g4runInitialized = false;
 
 		RemoraMessenger* remoraMessenger;
+
+    RemoraStateMachine* stateMachine;
 
     friend class RemoraMessenger;
 	};

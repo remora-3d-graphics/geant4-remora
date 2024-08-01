@@ -8,6 +8,8 @@ namespace remora {
     // initialize the messenger
     remoraMessenger = new RemoraMessenger(this);
 
+    stateMachine = new RemoraStateMachine();
+
     // currently the Init() function blocks Geant4 execution. TODO: put it on a thread
     if (Init() != 0) {
       G4cout
