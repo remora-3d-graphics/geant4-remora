@@ -15,5 +15,6 @@ Please keep in mind Remora's code cleanliness policy:
 - Thank you for contributing!
 
 ## Suggestions for contributing:
-- Check out the issues tab!
+- Just using the geant4 remora server and the remora client is helpful. You can help identify bugs and open issues.
+- Check out the issues tab, some issues are labelled as "good first issue."
 - If you're not sure if your idea will be a good change, feel free to email me at ojgames112000@gmail.com
