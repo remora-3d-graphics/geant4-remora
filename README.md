@@ -12,7 +12,15 @@ docker run --rm -p 8080:8080 -it remora_g4
 # note for me: use -itd in the docker containers to keep them on standby
 ```
 
-test
+# Pushing to docker
+```
+docker login -u remora3d
+docker build -f Dockerfile.test -t g4-demo .
+docker tag g4-demo remora3d/g4-demo:tagname
+docker push remora3d/g4-demo:tagname
+docker tag g4-demo remora3d/g4-demo:latest
+docker push remora3d/g4-demo:latest
+```
 
 # Todo:
 - [x] Make a client recv thread and send thread. The issue is that the server waits to hear back from the client.
