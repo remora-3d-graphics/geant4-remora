@@ -30,6 +30,9 @@ namespace remora {
     G4UIcmdWithAString* fRmShapeWithNameCmd;
     G4UIcmdWith3Vector* fChangeColorCmd;
 	
+    G4UIcmdWithoutParameter* fActivateCmd;
+    G4UIcmdWithoutParameter* fDeactivateCmd;
+
 	};
 }
 

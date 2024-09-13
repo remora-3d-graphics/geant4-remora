@@ -4,6 +4,9 @@ namespace remora {
 	RemoraMessenger::RemoraMessenger(Server* s) 
   : G4UImessenger(), serverPtr(s) {
 		fDirectory = new G4UIdirectory("/remora/");
+
+    fActivateCmd = new G4UIcmdWithoutParameter("/remora/activate", this);
+    fDeactivateCmd = new G4UIcmdWithoutParameter("/remora/deactivate", this);
 	
 		fChangeTitleCmd = new G4UIcmdWithAString("/remora/setTitle", this);
     fSendDetectorsCmd = new G4UIcmdWithoutParameter("/remora/sendDetectors", this);
@@ -15,6 +18,12 @@ namespace remora {
 	}
 
 	void RemoraMessenger::SetNewValue(G4UIcommand* cmd, G4String newValues) {
+    if (cmd == fActivateCmd){
+      serverPtr->Activate();
+    }
+    if (cmd == fDeactivateCmd){
+      serverPtr->Deactivate();
+    }
 		if (cmd == fChangeTitleCmd) {
 			G4String setTitleCommand = "SetTitle" + newValues;
 			serverPtr->QueueMessageToBeSent(setTitleCommand);
