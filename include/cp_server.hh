@@ -45,6 +45,9 @@ namespace remora {
 
     RemoraSteppingAction* GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction=nullptr);
 
+    void Activate();
+    void Deactivate();
+
 	private:
 		int Init();
 		void AcceptConnections();

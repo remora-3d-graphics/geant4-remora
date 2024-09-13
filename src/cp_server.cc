@@ -25,11 +25,24 @@ namespace remora {
   }
 
   Server::~Server() {
-    Stop();
-    listenThread.join();
-    sendTrajsThread.join();
+    Deactivate();
 
     delete remoraMessenger;
+  }
+
+  void Server::Deactivate(){
+    listenThread.~thread();
+    sendTrajsThread.~thread();
+    running = false;
+  }
+
+  void Server::Activate(){
+    if (running) return;
+
+    listenThread = std::thread(&Server::AcceptConnections, this);
+    sendTrajsThread = std::thread(&Server::SendTrajsLoop, this);
+
+    running = true;
   }
 
   RemoraSteppingAction* Server::GetRemoraSteppingAction(G4UserSteppingAction* prevSteppingAction){
